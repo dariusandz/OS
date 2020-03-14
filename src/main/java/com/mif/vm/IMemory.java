@@ -2,5 +2,5 @@ package com.mif.vm;
 
 public interface IMemory {
 
-    String getCommand(int displacement);
+    String getWord(int displacement);
 }

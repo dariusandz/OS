@@ -22,9 +22,13 @@ public class Register {
         return ByteBuffer.wrap(this.value).getInt();
     }
 
+    public byte[] getByteValue() { return this.value; }
+
     public void setValue(int value) {
         this.value = ByteBuffer.allocate(this.size).putInt(value).array();
     }
+
+    public void setValue(byte[] bytes) { this.value = bytes; }
 
     public void incrementValue(int by) {
         int value = this.getValue();

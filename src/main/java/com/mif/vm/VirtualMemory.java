@@ -3,10 +3,13 @@ package com.mif.vm;
 import java.io.*;
 import java.util.Arrays;
 
+import com.mif.common.Util;
 import com.sun.tools.javac.util.ArrayUtils;
 import org.apache.commons.io.IOUtils;
 
 public class VirtualMemory implements IMemory {
+
+    private static int pageSize = 16;
 
     protected static int wordSize = 4;
     protected static int hexSize = 8;
@@ -16,13 +19,29 @@ public class VirtualMemory implements IMemory {
 
     public byte[] memory = new byte[wordSize * pages * words];
 
-    public VirtualMemory() { }
+    public VirtualMemory() { Arrays.fill(memory, (byte) 0); }
 
+    // Gets a word from CODESEG
     public String getWord(int displacement) {
         StringBuilder sb = new StringBuilder();
         for (int i = displacement; i < displacement + wordSize; i++)
             sb.append((char) memory[i]);
         return sb.toString();
+    }
+
+    // Gets a word from DATASEG
+    public String getWordFromMemory(int page, int word) {
+        int locationInMemory = page * pageSize + word;
+        byte[] bytesInMemory = Arrays.copyOfRange(memory, locationInMemory, locationInMemory + 4);
+        return Util.bytesToString(bytesInMemory);
+    }
+
+    // Puts a word to DATASEG from reg
+    public void putValueToMemory(int value, int page, int word) {
+        byte[] byteValue = Util.intToBytes(value);
+        int byteIndex = 0;
+        for (int i = page * pageSize + word; i < page * pageSize + word + wordSize; i++)
+            memory[i] = byteValue[byteIndex++];
     }
 
     private String getHexWord(int displacement, String code) {
@@ -38,6 +57,7 @@ public class VirtualMemory implements IMemory {
         return hexBytes;
     }
 
+    // Loads a program from file into string
     public void loadProgram(String filePath) {
         try {
             InputStream inputStream = VirtualMemory.class.getResourceAsStream(filePath);
@@ -49,6 +69,7 @@ public class VirtualMemory implements IMemory {
         }
     }
 
+    // Puts loaded program from file to CODESEG
     private void putIntoMemory(String code) {
         for (int i = 0; i < code.length(); i += 4) {
             String word = code.substring(i, i + 4);
@@ -64,6 +85,7 @@ public class VirtualMemory implements IMemory {
         }
     }
 
+    // Puts a program word as bytes into CODESEG
     private void putBytesIntoMemory(byte[] word, int displacement) {
         int byteProcessed = 0;
         for (int i = displacement; i < displacement + word.length; i++)

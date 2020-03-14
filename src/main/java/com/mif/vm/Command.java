@@ -26,30 +26,46 @@ public class Command {
         else if (getCommandValue(command, 3) == LDM.getValue()) {
             LDM(command);
         }
-        else if (getCommandValue(command, 2) == SV.getValue()) {
-            System.out.println("SV");
+        else if (getCommandValue(command, 3) == SVR.getValue()) {
+            SVR(command);
         }
         else if (getCommandValue(command, 2) == CP.getValue()) {
-            System.out.println("CP");
+            CP(command);
         }
         else if (getCommandValue(command, 2) == AD.getValue()) {
-            System.out.println("AD");
+            AD(command);
         }
         else if (getCommandValue(command, 2) == SB.getValue()) {
-            System.out.println("SB");
+            SB(command);
         }
         else if (getCommandValue(command, 2) == ML.getValue()) {
-            System.out.println("ML");
+            ML(command);
         }
         else if (getCommandValue(command, 2) == DV.getValue()) {
-            System.out.println("DV");
+            DV(command);
         }
         else if (getCommandValue(command, 2) == CM.getValue()) {
-            System.out.println("CM");
+            CM(command);
         }
         else if (getCommandValue(command, 2) == AN.getValue()) {
-            System.out.println("AN");
+            AN(command);
         }
+        else if (getCommandValue(command, 2) == XR.getValue()) {
+            XR(command);
+        }
+        else if (getCommandValue(command, 2) == OR.getValue()) {
+            OR(command);
+        }
+        else if (getCommandValue(command, 3) == NOT.getValue()) {
+            NOT(command);
+        }
+        else if (getCommandValue(command, 2) == LS.getValue()) {
+            LS(command);
+        }
+        else if (getCommandValue(command, 2) == RS.getValue()) {
+            RS(command);
+        }
+
     }
 
     private int getCommandValue(String command, int commandLen) {
@@ -70,16 +86,146 @@ public class Command {
         return memory.getWord(IC.getValue());
     }
 
+    private char getRegChar(String command, int regIndex) {
+        return command.charAt(regIndex);
+    }
+
     private void LDN(String command) {
-        char regChar = command.charAt(3);
+        char regChar = getRegChar(command, 3);
+
+        String hexValue = nextWord();
         getRegister(regChar).setValue(
-                Util.stringBytesToInt(nextWord())
+                Util.stringBytesToInt(hexValue)
         );
     }
 
     private void LDM(String command) {
-        char register = command.charAt(3);
+        char regChar = getRegChar(command, 3);
 
+        String hexValue = nextWord();
+        int page = Util.getIthByteFromString(hexValue, 2);
+        int word = Util.getIthByteFromString(hexValue, 3);
+
+        memory.getWordFromMemory(page, word);
     }
+
+    private void SVR(String command) {
+        char regChar = getRegChar(command, 3);
+        int regVal = getRegister(regChar).getValue();
+
+        String hexValue = nextWord();
+        int page = Util.getIthByteFromString(hexValue, 2);
+        int word = Util.getIthByteFromString(hexValue, 3);
+
+        memory.putValueToMemory(regVal, page, word);
+    }
+
+    private void CP(String command) {
+        char r1 = getRegChar(command, 2);
+        char r2 = getRegChar(command, 3);
+
+        getRegister(r1).setValue(
+                getRegister(r2).getValue()
+        );
+    }
+
+    private void AD(String command) {
+        char r1 = getRegChar(command, 2);
+        char r2 = getRegChar(command, 3);
+
+        getRegister(r1).setValue(
+                getRegister(r2).getValue() + getRegister(r1).getValue()
+        );
+    }
+
+    private void SB(String command) {
+        char r1 = getRegChar(command, 2);
+        char r2 = getRegChar(command, 3);
+
+        getRegister(r1).setValue(
+                getRegister(r1).getValue() - getRegister(r2).getValue()
+        );
+    }
+
+    private void ML(String command) {
+        char r1 = getRegChar(command, 2);
+        char r2 = getRegChar(command, 3);
+
+        getRegister(r1).setValue(
+                getRegister(r1).getValue() * getRegister(r2).getValue()
+        );
+    }
+
+    private void DV(String command) {
+        char r1 = getRegChar(command, 2);
+        char r2 = getRegChar(command, 3);
+
+        getRegister(r1).setValue(
+                getRegister(r1).getValue() / getRegister(r2).getValue()
+        );
+    }
+
+    private void CM(String command) {
+        char r1 = getRegChar(command, 2);
+        char r2 = getRegChar(command, 3);
+
+        int diff = getRegister(r1).getValue() - getRegister(r2).getValue();
+        if (diff == 0)
+            ; // TODO set PR register value depending on above result
+    }
+
+    private void AN(String command) {
+        char r1 = getRegChar(command, 2);
+        char r2 = getRegChar(command, 3);
+
+        getRegister(r1).setValue(
+                getRegister(r1).getValue() & getRegister(r2).getValue()
+        );
+    }
+
+    private void XR(String command) {
+        char r1 = getRegChar(command, 2);
+        char r2 = getRegChar(command, 3);
+
+        getRegister(r1).setValue(
+                getRegister(r1).getValue() ^ getRegister(r2).getValue()
+        );
+    }
+
+    private void OR(String command) {
+        char r1 = getRegChar(command, 2);
+        char r2 = getRegChar(command, 3);
+
+        getRegister(r1).setValue(
+                getRegister(r1).getValue() ^ getRegister(r2).getValue()
+        );
+    }
+
+    private void NOT(String command) {
+        char r1 = getRegChar(command, 3);
+
+        getRegister(r1).setValue(
+                ~getRegister(r1).getValue()
+        );
+    }
+
+    private void LS(String command) {
+        char r1 = getRegChar(command, 2);
+        char r2 = getRegChar(command, 3);
+
+        getRegister(r1).setValue(
+                getRegister(r1).getValue() << getRegister(r2).getValue()
+        );
+    }
+
+    private void RS(String command) {
+        char r1 = getRegChar(command, 2);
+        char r2 = getRegChar(command, 3);
+
+        getRegister(r1).setValue(
+                getRegister(r1).getValue() >> getRegister(r2).getValue()
+        );
+    }
+
 
 }

@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 public enum CMD {
 
-    LDN("LDN"), LDM("LDM"), SV("SV"), CP("CP"), // Atminties ir registru valdymo
+    LDN("LDN"), LDM("LDM"), SVR("SVR"), CP("CP"), // Atminties ir registru valdymo
     AD("AD"), SB("SB"), ML("ML"), DV("DV"), CM("CM"), AN("AN"), // Aritmetines
     XR("XR"), OR("OR"), NOT("NOT"), LS("LS"), RS("RS"), // Loginiu operaciju
     JUMP("JUMP"), JMPG("JMPG"), JMPL("JMPL"), JMPZ("JMPZ"), JPNZ("JPNZ"), LOOP("LOOP"), HALT("HALT"), STSB("STSB"), LDSB("LDSB"), // Valdymo perdavimo

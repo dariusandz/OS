@@ -65,7 +65,69 @@ public class Command {
         else if (getCommandValue(command, 2) == RS.getValue()) {
             RS(command);
         }
-
+        else if (getCommandValue(command, 4) == JUMP.getValue()) {
+            JUMP(command);
+        }
+        else if (getCommandValue(command, 4) == JMPG.getValue()) {
+            JMPG(command);
+        }
+        else if (getCommandValue(command, 4) == JMPL.getValue()) {
+            JMPL(command);
+        }
+        else if (getCommandValue(command, 4) == JMPZ.getValue()) {
+            JMPZ(command);
+        }
+        else if (getCommandValue(command, 4) == JPNZ.getValue()) {
+            JPNZ(command);
+        }
+        else if (getCommandValue(command, 4) == LOOP.getValue()) {
+            LOOP(command);
+        }
+        else if (getCommandValue(command, 4) == HALT.getValue()) {
+            HALT(command);
+        }
+        else if (getCommandValue(command, 4) == STSB.getValue()) {
+            STSB(command);
+        }
+        else if (getCommandValue(command, 4) == LDSB.getValue()) {
+            LDSB(command);
+        }
+        else if (getCommandValue(command, 4) == PUSH.getValue()) {
+            PUSH(command);
+        }
+        else if (getCommandValue(command, 4) == POPP.getValue()) {
+            POPP(command);
+        }
+        else if (getCommandValue(command, 4) == PRNT.getValue()) {
+            PRNT(command);
+        }
+        else if (getCommandValue(command, 4) == PNUM.getValue()) {
+            PNUM(command);
+        }
+        else if (getCommandValue(command, 4) == SCAN.getValue()) {
+            SCAN(command);
+        }
+        else if (getCommandValue(command, 4) == LOAD.getValue()) {
+            LOAD(command);
+        }
+        else if (getCommandValue(command, 4) == MONT.getValue()) {
+            MONT(command);
+        }
+        else if (getCommandValue(command, 4) == UMNT.getValue()) {
+            UMNT(command);
+        }
+        else if (getCommandValue(command, 4) == POWR.getValue()) {
+            POWR(command);
+        }
+        else if (getCommandValue(command, 4) == SVAL.getValue()) {
+            SVAL(command);
+        }
+        else if (getCommandValue(command, 4) == GVAL.getValue()) {
+            GVAL(command);
+        }
+        else if (getCommandValue(command, 4) == TYPE.getValue()) {
+            TYPE(command);
+        }
     }
 
     private int getCommandValue(String command, int commandLen) {
@@ -227,5 +289,100 @@ public class Command {
         );
     }
 
+    private void JUMP(String command) {
+        String hexVal = nextWord();
+        // TODO issiaiskink ka cia kaip
+    }
+
+    private void JMPG(String command) {
+        // TODO
+    }
+
+    private void JMPL(String command) {
+        // TODO
+    }
+
+    private void JMPZ(String command) {
+        // TODO
+    }
+
+    private void JNPZ(String command) {
+        // TODO
+    }
+
+    private void JPNZ(String command) {
+        // TODO
+    }
+
+    private void LOOP(String command) {
+        Ax.setValue(
+                Ax.getValue() - 1
+        );
+
+        if (Ax.getValue() != 0) {
+            String hexVal = nextWord();
+            ;// TODO set IC to PA
+        }
+    }
+
+    private void HALT(String command) {
+        // TODO set SI = 3
+    }
+
+    private void STSB(String command) {
+
+    }
+
+    private void LDSB(String command) {
+
+    }
+
+    private void PUSH(String command) {
+
+    }
+
+    private void POPP(String command) {
+
+    }
+
+    private void PRNT(String command) {
+
+    }
+
+    private void PNUM(String command) {
+
+    }
+
+    private void SCAN(String command) {
+
+    }
+
+    private void LOAD(String command) {
+
+    }
+
+    private void MONT(String command) {
+
+    }
+
+    private void UMNT(String command) {
+
+    }
+
+    private void POWR(String command) {
+
+    }
+
+    private void SVAL(String command) {
+
+    }
+
+    private void GVAL(String command) {
+
+    }
+
+    private void TYPE(String command) {
+
+    }
 
 }

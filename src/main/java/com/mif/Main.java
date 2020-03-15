@@ -1,5 +1,7 @@
 package com.mif;
 
+import com.mif.rm.Memory;
+import com.mif.rm.Processor;
 import com.mif.vm.VirtualMachine;
 
 public class Main {

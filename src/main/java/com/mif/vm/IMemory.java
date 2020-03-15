@@ -2,8 +2,9 @@ package com.mif.vm;
 
 public interface IMemory {
 
-    String getWord(int displacement);
+    byte[] getCodeWord(int nthWord);
+    byte[] getWordFromMemory(int page, int word);
 
-    void putValueToMemory(int value, int page, int word);
-    String getWordFromMemory(int page, int word);
+    void putValueToMemory(int page, int word, int value);
+    void putWordToMemory(int pageNum, int wordNum, byte[] word);
 }

@@ -12,13 +12,12 @@ public class VirtualProcessor extends Command {
         String command;
         while(!(command = getCommand()).equals("HALT")) {
             processCommand(command);
-            IC.incrementValue(4);
+            IC.incrementValue();
         }
 
     }
 
-    private String getCommand() {
-        return memory.getWord(IC.getValue());
+    private String getCommand() { return new String(memory.getCodeWord(IC.getValue()));
     }
 
 }

@@ -1,7 +1,7 @@
 package com.mif.vm;
 
 import com.mif.common.Register;
-import com.mif.common.Util;
+import com.mif.common.ByteUtil;
 
 import java.nio.ByteBuffer;
 import static com.mif.vm.CMD.*;
@@ -144,8 +144,8 @@ public class Command {
     }
 
     private String nextWord() {
-        IC.incrementValue(4);
-        return memory.getWord(IC.getValue());
+        IC.incrementValue();
+        return new String(memory.getCodeWord(IC.getValue()));
     }
 
     private char getRegChar(String command, int regIndex) {
@@ -157,7 +157,7 @@ public class Command {
 
         String hexValue = nextWord();
         getRegister(regChar).setValue(
-                Util.stringBytesToInt(hexValue)
+                ByteUtil.stringBytesToInt(hexValue)
         );
     }
 
@@ -165,8 +165,8 @@ public class Command {
         char regChar = getRegChar(command, 3);
 
         String hexValue = nextWord();
-        int page = Util.getIthByteFromString(hexValue, 2);
-        int word = Util.getIthByteFromString(hexValue, 3);
+        int page = ByteUtil.getIthByteFromString(hexValue, 2);
+        int word = ByteUtil.getIthByteFromString(hexValue, 3);
 
         memory.getWordFromMemory(page, word);
     }
@@ -176,10 +176,10 @@ public class Command {
         int regVal = getRegister(regChar).getValue();
 
         String hexValue = nextWord();
-        int page = Util.getIthByteFromString(hexValue, 2);
-        int word = Util.getIthByteFromString(hexValue, 3);
+        int page = ByteUtil.getIthByteFromString(hexValue, 2);
+        int word = ByteUtil.getIthByteFromString(hexValue, 3);
 
-        memory.putValueToMemory(regVal, page, word);
+        memory.putValueToMemory(page, word, regVal);
     }
 
     private void CP(String command) {

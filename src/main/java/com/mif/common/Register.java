@@ -1,6 +1,7 @@
 package com.mif.common;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class Register {
 
@@ -8,7 +9,7 @@ public class Register {
 
     private byte[] value = new byte[size];
 
-    public Register() { }
+    public Register() { Arrays.fill(value, (byte) 0); }
 
     public Register(int initialValue) {
         this.value = ByteBuffer.allocate(this.size).putInt(initialValue).array();
@@ -34,5 +35,10 @@ public class Register {
         int value = this.getValue();
         value += by;
         this.setValue(value);
+    }
+
+    public void incrementValue() {
+        int value = this.getValue();
+        this.setValue(++value);
     }
 }

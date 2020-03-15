@@ -1,13 +1,18 @@
 package com.mif.vm;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-import com.mif.common.Util;
-import com.sun.tools.javac.util.ArrayUtils;
+import com.mif.common.ByteUtil;
 import org.apache.commons.io.IOUtils;
 
 public class VirtualMemory implements IMemory {
+
+    private static final int PARAMSEG_START_PAGE = 0;
+    private static final int DATASEG_START_PAGE = 1;
+    private static final int CODESEG_START_PAGE = 3;
 
     private static int pageSize = 16;
 
@@ -17,44 +22,48 @@ public class VirtualMemory implements IMemory {
     public static int pages = 16;
     public static int words = 16;
 
-    public byte[] memory = new byte[wordSize * pages * words];
+    private PagingTable pagingTable = new PagingTable();
 
-    public VirtualMemory() { Arrays.fill(memory, (byte) 0); }
+    public VirtualMemory() {
+        pagingTable.requestPages(pages);
+    }
 
     // Gets a word from CODESEG
-    public String getWord(int displacement) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = displacement; i < displacement + wordSize; i++)
-            sb.append((char) memory[i]);
-        return sb.toString();
+    public byte[] getCodeWord(int nthWord) {
+        return pagingTable.getWordFromMemory(CODESEG_START_PAGE, nthWord);
     }
 
     // Gets a word from DATASEG
-    public String getWordFromMemory(int page, int word) {
-        int locationInMemory = page * pageSize + word;
-        byte[] bytesInMemory = Arrays.copyOfRange(memory, locationInMemory, locationInMemory + 4);
-        return Util.bytesToString(bytesInMemory);
+    public byte[] getWordFromMemory(int page, int word) {
+        return pagingTable.getWordFromMemory(page, word);
     }
 
     // Puts a word to DATASEG from reg
-    public void putValueToMemory(int value, int page, int word) {
-        byte[] byteValue = Util.intToBytes(value);
-        int byteIndex = 0;
-        for (int i = page * pageSize + word; i < page * pageSize + word + wordSize; i++)
-            memory[i] = byteValue[byteIndex++];
+    public void putValueToMemory(int page, int word, int value) {
+        byte[] byteValue = ByteUtil.intToBytes(value);
+        pagingTable.putWordToMemory(page, word, byteValue);
     }
 
-    private String getHexWord(int displacement, String code) {
-        return code.substring(displacement, displacement + 8);
+    public void putWordToMemory(int pageNum, int wordNum, byte[] word) {
+        pagingTable.putWordToMemory(pageNum, wordNum, word);
     }
 
-    private byte[] getHexBytes(String word) {
-        byte[] hexBytes = new byte[4];
-        for (int i = 0; i < word.length(); i += 2) {
-            hexBytes[i / 2] = (byte) ((Character.digit(word.charAt(i), 16) << 4)
-                                        + Character.digit(word.charAt(i+1), 16));
+    private byte[] replaceHex(String program) {
+        List<Byte> byteList = new ArrayList<>();
+
+        for (int i = 0; i < program.length(); i += 4) {
+            String command = program.substring(i, i + 4);
+            byteList = ByteUtil.appendBytesToByteList(byteList, command.getBytes());
+            if (command.contains("LD") || command.contains("SVR") || command.startsWith("J")) {
+                byte[] hexbytes = ByteUtil.minifyHex(
+                        program.substring(i + 4, i + 12)
+                );
+                byteList = ByteUtil.appendBytesToByteList(byteList, hexbytes);
+                i += 8;
+            }
         }
-        return hexBytes;
+
+        return ByteUtil.getByteArrayFromByteList(byteList);
     }
 
     // Loads a program from file into string
@@ -63,32 +72,25 @@ public class VirtualMemory implements IMemory {
             InputStream inputStream = VirtualMemory.class.getResourceAsStream(filePath);
             String programStr = IOUtils.toString(inputStream, "UTF-8");
             programStr = programStr.replaceAll("\n", "").replace(" ", "");
-            putIntoMemory(programStr);
+            putIntoMemory(replaceHex(programStr));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     // Puts loaded program from file to CODESEG
-    private void putIntoMemory(String code) {
-        for (int i = 0; i < code.length(); i += 4) {
-            String word = code.substring(i, i + 4);
-            putBytesIntoMemory(word.getBytes(), i);
+    private void putIntoMemory(byte[] byteCode) {
+        for (int i = 0; i < byteCode.length / wordSize; i++) {
+            byte[] word = Arrays.copyOfRange(byteCode, i * wordSize, i * wordSize + wordSize);
+            putWordToMemory(CODESEG_START_PAGE, i, word);
 
-            // 8 Baitu komandos
-            if (word.contains("LD") || word.contains("SVR") || word.startsWith("J")) {
-                String hexWord = getHexWord(i + 4, code);
-                byte[] hexBytes = getHexBytes(hexWord);
-                putBytesIntoMemory(hexBytes, i + 4);
-                i += 8;
+            // 8 byte commands, reads next byte for hex value
+            String wordStr = new String(word);
+            if (wordStr.contains("LD") || wordStr.contains("SVR") || wordStr.startsWith("J")) {
+                i++;
+                byte[] hexWord = Arrays.copyOfRange(byteCode, i * wordSize, i * wordSize + wordSize);
+                putWordToMemory(CODESEG_START_PAGE, i, hexWord);
             }
         }
-    }
-
-    // Puts a program word as bytes into CODESEG
-    private void putBytesIntoMemory(byte[] word, int displacement) {
-        int byteProcessed = 0;
-        for (int i = displacement; i < displacement + word.length; i++)
-            this.memory[i] = word[byteProcessed++];
     }
 }

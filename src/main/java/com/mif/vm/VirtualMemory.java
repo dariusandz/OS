@@ -28,26 +28,28 @@ public class VirtualMemory implements IMemory {
         pagingTable.requestPages(pages);
     }
 
-    // Gets a word from CODESEG
+    // Gets a word(command) to execute from CODESEG
     public byte[] getCodeWord(int nthWord) {
         return pagingTable.getWordFromMemory(CODESEG_START_PAGE, nthWord);
     }
 
-    // Gets a word from DATASEG
+    // Gets a word from memory
     public byte[] getWordFromMemory(int page, int word) {
         return pagingTable.getWordFromMemory(page, word);
     }
 
-    // Puts a word to DATASEG from reg
+    // Puts a register value to memory
     public void putValueToMemory(int page, int word, int value) {
         byte[] byteValue = ByteUtil.intToBytes(value);
         pagingTable.putWordToMemory(page, word, byteValue);
     }
 
+    // Puts a word to memory
     public void putWordToMemory(int pageNum, int wordNum, byte[] word) {
         pagingTable.putWordToMemory(pageNum, wordNum, word);
     }
 
+    // Replaces 8byte hexes to 4byte hexes
     private byte[] replaceHex(String program) {
         List<Byte> byteList = new ArrayList<>();
 

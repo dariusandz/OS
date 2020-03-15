@@ -12,6 +12,8 @@ public class ByteUtil {
         return ByteBuffer.wrap(b).getInt();
     }
 
+    public static int byteToInt(byte[] bytes) { return ByteBuffer.wrap(bytes).getInt(); }
+
     public static byte[] intToBytes(int value) {
         return ByteBuffer.allocate(4).putInt(value).array();
     }

@@ -9,7 +9,7 @@ import static com.mif.vm.CMD.*;
 
 public class Command {
 
-    protected IMemory memory;
+    protected VirtualMemory memory;
     protected Processor processor;
 
     public Command(VirtualMemory memory) {
@@ -18,119 +18,119 @@ public class Command {
     }
 
     protected void processCommand(String command) {
-        if (getCommandValue(command, 3) == LDN.getValue()) {
+        if (getCommandByteValue(command, 3) == LDN.getValue()) {
             LDN(command);
         }
-        else if (getCommandValue(command, 3) == LDM.getValue()) {
+        else if (getCommandByteValue(command, 3) == LDM.getValue()) {
             LDM(command);
         }
-        else if (getCommandValue(command, 3) == SVR.getValue()) {
+        else if (getCommandByteValue(command, 3) == SVR.getValue()) {
             SVR(command);
         }
-        else if (getCommandValue(command, 2) == CP.getValue()) {
+        else if (getCommandByteValue(command, 2) == CP.getValue()) {
             CP(command);
         }
-        else if (getCommandValue(command, 2) == AD.getValue()) {
+        else if (getCommandByteValue(command, 2) == AD.getValue()) {
             AD(command);
         }
-        else if (getCommandValue(command, 2) == SB.getValue()) {
+        else if (getCommandByteValue(command, 2) == SB.getValue()) {
             SB(command);
         }
-        else if (getCommandValue(command, 2) == ML.getValue()) {
+        else if (getCommandByteValue(command, 2) == ML.getValue()) {
             ML(command);
         }
-        else if (getCommandValue(command, 2) == DV.getValue()) {
+        else if (getCommandByteValue(command, 2) == DV.getValue()) {
             DV(command);
         }
-        else if (getCommandValue(command, 2) == CM.getValue()) {
+        else if (getCommandByteValue(command, 2) == CM.getValue()) {
             CM(command);
         }
-        else if (getCommandValue(command, 2) == AN.getValue()) {
+        else if (getCommandByteValue(command, 2) == AN.getValue()) {
             AN(command);
         }
-        else if (getCommandValue(command, 2) == XR.getValue()) {
+        else if (getCommandByteValue(command, 2) == XR.getValue()) {
             XR(command);
         }
-        else if (getCommandValue(command, 2) == OR.getValue()) {
+        else if (getCommandByteValue(command, 2) == OR.getValue()) {
             OR(command);
         }
-        else if (getCommandValue(command, 3) == NOT.getValue()) {
+        else if (getCommandByteValue(command, 3) == NOT.getValue()) {
             NOT(command);
         }
-        else if (getCommandValue(command, 2) == LS.getValue()) {
+        else if (getCommandByteValue(command, 2) == LS.getValue()) {
             LS(command);
         }
-        else if (getCommandValue(command, 2) == RS.getValue()) {
+        else if (getCommandByteValue(command, 2) == RS.getValue()) {
             RS(command);
         }
-        else if (getCommandValue(command, 4) == JUMP.getValue()) {
+        else if (getCommandByteValue(command, 4) == JUMP.getValue()) {
             JUMP(command);
         }
-        else if (getCommandValue(command, 4) == JMPG.getValue()) {
+        else if (getCommandByteValue(command, 4) == JMPG.getValue()) {
             JMPG(command);
         }
-        else if (getCommandValue(command, 4) == JMPL.getValue()) {
+        else if (getCommandByteValue(command, 4) == JMPL.getValue()) {
             JMPL(command);
         }
-        else if (getCommandValue(command, 4) == JMPZ.getValue()) {
+        else if (getCommandByteValue(command, 4) == JMPZ.getValue()) {
             JMPZ(command);
         }
-        else if (getCommandValue(command, 4) == JPNZ.getValue()) {
+        else if (getCommandByteValue(command, 4) == JPNZ.getValue()) {
             JPNZ(command);
         }
-        else if (getCommandValue(command, 4) == LOOP.getValue()) {
+        else if (getCommandByteValue(command, 4) == LOOP.getValue()) {
             LOOP(command);
         }
-        else if (getCommandValue(command, 4) == HALT.getValue()) {
+        else if (getCommandByteValue(command, 4) == HALT.getValue()) {
             HALT(command);
         }
-        else if (getCommandValue(command, 4) == STSB.getValue()) {
+        else if (getCommandByteValue(command, 4) == STSB.getValue()) {
             STSB(command);
         }
-        else if (getCommandValue(command, 4) == LDSB.getValue()) {
+        else if (getCommandByteValue(command, 4) == LDSB.getValue()) {
             LDSB(command);
         }
-        else if (getCommandValue(command, 4) == PUSH.getValue()) {
+        else if (getCommandByteValue(command, 4) == PUSH.getValue()) {
             PUSH(command);
         }
-        else if (getCommandValue(command, 4) == POPP.getValue()) {
+        else if (getCommandByteValue(command, 4) == POPP.getValue()) {
             POPP(command);
         }
-        else if (getCommandValue(command, 4) == PRNT.getValue()) {
+        else if (getCommandByteValue(command, 4) == PRNT.getValue()) {
             PRNT(command);
         }
-        else if (getCommandValue(command, 4) == PNUM.getValue()) {
+        else if (getCommandByteValue(command, 4) == PNUM.getValue()) {
             PNUM(command);
         }
-        else if (getCommandValue(command, 4) == SCAN.getValue()) {
+        else if (getCommandByteValue(command, 4) == SCAN.getValue()) {
             SCAN(command);
         }
-        else if (getCommandValue(command, 4) == LOAD.getValue()) {
+        else if (getCommandByteValue(command, 4) == LOAD.getValue()) {
             LOAD(command);
         }
-        else if (getCommandValue(command, 4) == MONT.getValue()) {
+        else if (getCommandByteValue(command, 4) == MONT.getValue()) {
             MONT(command);
         }
-        else if (getCommandValue(command, 4) == UMNT.getValue()) {
+        else if (getCommandByteValue(command, 4) == UMNT.getValue()) {
             UMNT(command);
         }
-        else if (getCommandValue(command, 4) == POWR.getValue()) {
+        else if (getCommandByteValue(command, 4) == POWR.getValue()) {
             POWR(command);
         }
-        else if (getCommandValue(command, 4) == SVAL.getValue()) {
+        else if (getCommandByteValue(command, 4) == SVAL.getValue()) {
             SVAL(command);
         }
-        else if (getCommandValue(command, 4) == GVAL.getValue()) {
+        else if (getCommandByteValue(command, 4) == GVAL.getValue()) {
             GVAL(command);
         }
-        else if (getCommandValue(command, 4) == TYPE.getValue()) {
+        else if (getCommandByteValue(command, 4) == TYPE.getValue()) {
             TYPE(command);
         }
 
         processor.IC.incrementValue();
     }
 
-    private int getCommandValue(String command, int commandLen) {
+    private int getCommandByteValue(String command, int commandLen) {
         if (commandLen == 2)
             return (ByteBuffer.wrap(command.getBytes()).getInt() & 0xffff0000);
         else if (commandLen == 3)

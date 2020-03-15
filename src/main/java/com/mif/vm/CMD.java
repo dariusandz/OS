@@ -15,12 +15,12 @@ public enum CMD {
     private int value;
 
     CMD(String name) {
-        this.value = getIntValue(name);
+        this.value = getByteValue(name);
     }
 
     public int getValue() { return this.value; }
 
-    private int getIntValue(String command) {
+    private int getByteValue(String command) {
         StringBuilder sb = new StringBuilder(command);
         for (int i = command.length(); i < 4; i++)
             sb.append(" ");

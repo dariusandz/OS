@@ -8,7 +8,7 @@ import java.util.List;
 import com.mif.common.ByteUtil;
 import org.apache.commons.io.IOUtils;
 
-public class VirtualMemory implements IMemory {
+public class VirtualMemory {
 
     private static final int PARAMSEG_START_PAGE = 0;
     private static final int DATASEG_START_PAGE = 1;
@@ -22,10 +22,11 @@ public class VirtualMemory implements IMemory {
     public static int pages = 16;
     public static int words = 16;
 
-    private PagingTable pagingTable = new PagingTable();
+    public PagingTable pagingTable = new PagingTable();
 
     public VirtualMemory() {
         pagingTable.requestPages(pages);
+        pagingTable.setPaging();
     }
 
     // Gets a word(command) to execute from CODESEG

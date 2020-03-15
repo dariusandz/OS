@@ -5,6 +5,7 @@ public class VirtualMachine {
     private VirtualProcessor virtualProcessor;
 
     public VirtualMachine() {
+        VirtualMemory virtualMemory = new VirtualMemory();
         this.virtualProcessor = new VirtualProcessor(new VirtualMemory());
     }
 

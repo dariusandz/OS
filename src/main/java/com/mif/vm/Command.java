@@ -2,6 +2,7 @@ package com.mif.vm;
 
 import com.mif.common.Register;
 import com.mif.common.ByteUtil;
+import com.mif.rm.Processor;
 
 import java.nio.ByteBuffer;
 import static com.mif.vm.CMD.*;
@@ -9,14 +10,11 @@ import static com.mif.vm.CMD.*;
 public class Command {
 
     protected IMemory memory;
-    protected Register IC;
-    private Register Ax, Bx;
+    protected Processor processor;
 
     public Command(VirtualMemory memory) {
         this.memory = memory;
-        this.IC = new Register(0);
-        this.Ax = new Register(0);
-        this.Bx = new Register(0);
+        this.processor = Processor.getInstance();
     }
 
     protected void processCommand(String command) {
@@ -128,6 +126,8 @@ public class Command {
         else if (getCommandValue(command, 4) == TYPE.getValue()) {
             TYPE(command);
         }
+
+        processor.IC.incrementValue();
     }
 
     private int getCommandValue(String command, int commandLen) {
@@ -140,12 +140,12 @@ public class Command {
     }
 
     private Register getRegister(char regChar) {
-        return regChar == 'A' ? Ax : Bx;
+        return regChar == 'A' ? processor.AX : processor.BX;
     }
 
     private String nextWord() {
-        IC.incrementValue();
-        return new String(memory.getCodeWord(IC.getValue()));
+        processor.IC.incrementValue();
+        return new String(memory.getCodeWord(processor.IC.getValue()));
     }
 
     private char getRegChar(String command, int regIndex) {
@@ -315,11 +315,11 @@ public class Command {
     }
 
     private void LOOP(String command) {
-        Ax.setValue(
-                Ax.getValue() - 1
+        processor.AX.setValue(
+                processor.AX.getValue() - 1
         );
 
-        if (Ax.getValue() != 0) {
+        if (processor.AX.getValue() != 0) {
             String hexVal = nextWord();
             ;// TODO set IC to PA
         }

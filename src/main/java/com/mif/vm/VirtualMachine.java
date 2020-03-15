@@ -2,19 +2,17 @@ package com.mif.vm;
 
 public class VirtualMachine {
 
-    private VirtualMemory virtualMemory;
-    private VirtualProcessor processor;
+    private VirtualProcessor virtualProcessor;
 
     public VirtualMachine() {
-        this.virtualMemory = new VirtualMemory();
-        this.processor = new VirtualProcessor(virtualMemory);
+        this.virtualProcessor = new VirtualProcessor(new VirtualMemory());
     }
 
     public void run() {
-        processor.runProgram();
+        virtualProcessor.runProgram();
     }
 
-    public void loadInstructionsFromFile(String filename) {
-        virtualMemory.loadProgram(filename);
+    public void loadProgram(String filename) {
+        virtualProcessor.loadInstructionsFromFile(filename);
     }
 }

@@ -157,7 +157,7 @@ public class Command {
 
         String hexValue = nextWord();
         getRegister(regChar).setValue(
-                ByteUtil.stringBytesToInt(hexValue)
+                ByteUtil.stringHexToInt(hexValue)
         );
     }
 
@@ -233,7 +233,11 @@ public class Command {
 
         int diff = getRegister(r1).getValue() - getRegister(r2).getValue();
         if (diff == 0)
-            ; // TODO set PR register value depending on above result
+            processor.PR.setValue(0);
+        else if (diff < 0)
+            processor.PR.setValue(2);
+        else if(diff > 0)
+            processor.PR.setValue(1);
     }
 
     private void AN(String command) {
@@ -291,27 +295,45 @@ public class Command {
 
     private void JUMP(String command) {
         String hexVal = nextWord();
-        // TODO issiaiskink ka cia kaip
+        processor.IC.setValue(
+                ByteUtil.stringHexToInt(hexVal)
+        );
     }
 
     private void JMPG(String command) {
-        // TODO
+        String hexVal = nextWord();
+        if (processor.PR.getValue() == 0) {
+            processor.IC.setValue(
+                    ByteUtil.stringHexToInt(hexVal)
+            );
+        }
     }
 
     private void JMPL(String command) {
-        // TODO
+        String hexVal = nextWord();
+        if (processor.PR.getValue() == 1) {
+            processor.IC.setValue(
+                    ByteUtil.stringHexToInt(hexVal)
+            );
+        }
     }
 
     private void JMPZ(String command) {
-        // TODO
-    }
-
-    private void JNPZ(String command) {
-        // TODO
+        String hexVal = nextWord();
+        if (processor.PR.getValue() == 2) {
+            processor.IC.setValue(
+                    ByteUtil.stringHexToInt(hexVal)
+            );
+        }
     }
 
     private void JPNZ(String command) {
-        // TODO
+        String hexVal = nextWord();
+        if (processor.PR.getValue() == 3) {
+            processor.IC.setValue(
+                    ByteUtil.stringHexToInt(hexVal)
+            );
+        }
     }
 
     private void LOOP(String command) {
@@ -321,12 +343,16 @@ public class Command {
 
         if (processor.AX.getValue() != 0) {
             String hexVal = nextWord();
-            ;// TODO set IC to PA
+            processor.IC.setValue(
+                    ByteUtil.stringHexToInt(hexVal)
+            );
         }
     }
 
     private void HALT(String command) {
-        // TODO set SI = 3
+        processor.SI.setValue(
+                3
+        );
     }
 
     private void STSB(String command) {
@@ -346,19 +372,27 @@ public class Command {
     }
 
     private void PRNT(String command) {
-
+        processor.SI.setValue(
+                2
+        );
     }
 
     private void PNUM(String command) {
-
+        processor.SI.setValue(
+                4
+        );
     }
 
     private void SCAN(String command) {
-
+        processor.SI.setValue(
+                1
+        );
     }
 
     private void LOAD(String command) {
-
+        processor.SI.setValue(
+                5
+        );
     }
 
     private void MONT(String command) {
@@ -370,19 +404,27 @@ public class Command {
     }
 
     private void POWR(String command) {
-
+        processor.SI.setValue(
+                6
+        );
     }
 
     private void SVAL(String command) {
-
+        processor.SI.setValue(
+                7
+        );
     }
 
     private void GVAL(String command) {
-
+        processor.SI.setValue(
+                8
+        );
     }
 
     private void TYPE(String command) {
-
+        processor.SI.setValue(
+                9
+        );
     }
 
 }

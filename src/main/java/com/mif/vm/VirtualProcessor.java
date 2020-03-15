@@ -4,7 +4,6 @@ public class VirtualProcessor extends Command {
 
     public VirtualProcessor(VirtualMemory memory) {
         super(memory);
-
     }
 
     public void runProgram() {

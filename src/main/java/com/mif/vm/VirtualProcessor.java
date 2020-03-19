@@ -54,6 +54,7 @@ public class VirtualProcessor extends Command {
             case 9:
                 break;
             default:
+                processor.SI.setValue(0);
                 return true;
         }
         return true;

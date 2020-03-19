@@ -353,7 +353,7 @@ public class Command {
 
     private void JMPZ() {
         String hexVal = nextWord();
-        if (processor.PR.getValue() == 2) {
+        if (processor.ZF.getValue() == 1) {
             processor.IC.setValue(
                     ByteUtil.stringHexToInt(hexVal)
             );

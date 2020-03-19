@@ -9,7 +9,7 @@ public class Memory {
 
     private static final int pageSize = 16;
     private static final int wordLen = 4;
-    private static final int defaultMemorySize = 4096;
+    private static final int defaultMemorySize = 1024;
 
     private static Memory globalMemory = null;
 

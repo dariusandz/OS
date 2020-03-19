@@ -2,141 +2,135 @@ package com.mif.vm;
 
 import com.mif.common.Register;
 import com.mif.common.ByteUtil;
+import com.mif.rm.Processor;
 
 import java.nio.ByteBuffer;
 import static com.mif.vm.CMD.*;
 
 public class Command {
 
-    private static final int pageSize = 16;
-
-    IMemory memory;
-    protected Register IC;
-    Register Ax, Bx, SP, PR, SI, ZF;
+    VirtualMemory memory;
+    protected Processor processor;
 
     public Command(VirtualMemory memory) {
         this.memory = memory;
-        this.IC = new Register(0);
-        this.Ax = new Register(0);
-        this.Bx = new Register(0);
-        this.SP = new Register(0);
-        this.PR = new Register(0);
-        this.SI = new Register(0);
-        this.ZF = new Register(0);
+        this.processor = Processor.getInstance();
     }
 
     protected void processCommand(String command) {
-        if (getCommandValue(command, 3) == LDN.getValue()) {
+        if (getCommandByteValue(command, 3) == LDN.getValue()) {
             LDN(command);
         }
-        else if (getCommandValue(command, 3) == LDM.getValue()) {
+        else if (getCommandByteValue(command, 3) == LDM.getValue()) {
             LDM(command);
         }
-        else if (getCommandValue(command, 3) == SVR.getValue()) {
+        else if (getCommandByteValue(command, 3) == SVR.getValue()) {
             SVR(command);
         }
-        else if (getCommandValue(command, 2) == CP.getValue()) {
+        else if (getCommandByteValue(command, 2) == CP.getValue()) {
             CP(command);
         }
-        else if (getCommandValue(command, 2) == AD.getValue()) {
+        else if (getCommandByteValue(command, 2) == AD.getValue()) {
             AD(command);
         }
-        else if (getCommandValue(command, 2) == SB.getValue()) {
+        else if (getCommandByteValue(command, 2) == SB.getValue()) {
             SB(command);
         }
-        else if (getCommandValue(command, 2) == ML.getValue()) {
+        else if (getCommandByteValue(command, 2) == ML.getValue()) {
             ML(command);
         }
-        else if (getCommandValue(command, 2) == DV.getValue()) {
+        else if (getCommandByteValue(command, 2) == DV.getValue()) {
             DV(command);
         }
-        else if (getCommandValue(command, 2) == CM.getValue()) {
+        else if (getCommandByteValue(command, 2) == CM.getValue()) {
             CM(command);
         }
-        else if (getCommandValue(command, 2) == AN.getValue()) {
+        else if (getCommandByteValue(command, 2) == AN.getValue()) {
             AN(command);
         }
-        else if (getCommandValue(command, 2) == XR.getValue()) {
+        else if (getCommandByteValue(command, 2) == XR.getValue()) {
             XR(command);
         }
-        else if (getCommandValue(command, 2) == OR.getValue()) {
+        else if (getCommandByteValue(command, 2) == OR.getValue()) {
             OR(command);
         }
-        else if (getCommandValue(command, 3) == NOT.getValue()) {
+        else if (getCommandByteValue(command, 3) == NOT.getValue()) {
             NOT(command);
         }
-        else if (getCommandValue(command, 2) == LS.getValue()) {
+        else if (getCommandByteValue(command, 2) == LS.getValue()) {
             LS(command);
         }
-        else if (getCommandValue(command, 2) == RS.getValue()) {
+        else if (getCommandByteValue(command, 2) == RS.getValue()) {
             RS(command);
         }
-        else if (getCommandValue(command, 4) == JUMP.getValue()) {
+        else if (getCommandByteValue(command, 4) == JUMP.getValue()) {
             JUMP();
         }
-        else if (getCommandValue(command, 4) == JMPG.getValue()) {
+        else if (getCommandByteValue(command, 4) == JMPG.getValue()) {
             JMPG();
         }
-        else if (getCommandValue(command, 4) == JMPL.getValue()) {
+        else if (getCommandByteValue(command, 4) == JMPL.getValue()) {
             JMPL();
         }
-        else if (getCommandValue(command, 4) == JMPZ.getValue()) {
+        else if (getCommandByteValue(command, 4) == JMPZ.getValue()) {
             JMPZ();
         }
-        else if (getCommandValue(command, 4) == JPNZ.getValue()) {
+        else if (getCommandByteValue(command, 4) == JPNZ.getValue()) {
             JPNZ();
         }
-        else if (getCommandValue(command, 4) == LOOP.getValue()) {
+        else if (getCommandByteValue(command, 4) == LOOP.getValue()) {
             LOOP();
         }
-        else if (getCommandValue(command, 4) == HALT.getValue()) {
-            HALT();
+        else if (getCommandByteValue(command, 4) == HALT.getValue()) {
+            HALT(command);
         }
-        else if (getCommandValue(command, 4) == STSB.getValue()) {
+        else if (getCommandByteValue(command, 4) == STSB.getValue()) {
             STSB(command);
         }
-        else if (getCommandValue(command, 4) == LDSB.getValue()) {
+        else if (getCommandByteValue(command, 4) == LDSB.getValue()) {
             LDSB(command);
         }
-        else if (getCommandValue(command, 4) == PUSH.getValue()) {
+        else if (getCommandByteValue(command, 4) == PUSH.getValue()) {
             PUSH();
         }
-        else if (getCommandValue(command, 4) == POPP.getValue()) {
+        else if (getCommandByteValue(command, 4) == POPP.getValue()) {
             POPP();
         }
-        else if (getCommandValue(command, 4) == PRNT.getValue()) {
+        else if (getCommandByteValue(command, 4) == PRNT.getValue()) {
             PRNT();
         }
-        else if (getCommandValue(command, 4) == PNUM.getValue()) {
+        else if (getCommandByteValue(command, 4) == PNUM.getValue()) {
             PNUM();
         }
-        else if (getCommandValue(command, 4) == SCAN.getValue()) {
+        else if (getCommandByteValue(command, 4) == SCAN.getValue()) {
             SCAN();
         }
-        else if (getCommandValue(command, 4) == LOAD.getValue()) {
+        else if (getCommandByteValue(command, 4) == LOAD.getValue()) {
             LOAD();
         }
-        else if (getCommandValue(command, 4) == MONT.getValue()) {
+        else if (getCommandByteValue(command, 4) == MONT.getValue()) {
             MONT();
         }
-        else if (getCommandValue(command, 4) == UNMT.getValue()) {
+        else if (getCommandByteValue(command, 4) == UNMT.getValue()) {
             UNMT();
         }
-        else if (getCommandValue(command, 4) == POWR.getValue()) {
+        else if (getCommandByteValue(command, 4) == POWR.getValue()) {
             POWR();
         }
-        else if (getCommandValue(command, 4) == SVAL.getValue()) {
+        else if (getCommandByteValue(command, 4) == SVAL.getValue()) {
             SVAL();
         }
-        else if (getCommandValue(command, 4) == GVAL.getValue()) {
+        else if (getCommandByteValue(command, 4) == GVAL.getValue()) {
             GVAL();
         }
-        else if (getCommandValue(command, 4) == TYPE.getValue()) {
+        else if (getCommandByteValue(command, 4) == TYPE.getValue()) {
             TYPE();
         }
+
+        processor.IC.incrementValue();
     }
 
-    private int getCommandValue(String command, int commandLen) {
+    private int getCommandByteValue(String command, int commandLen) {
         if (commandLen == 2)
             return (ByteBuffer.wrap(command.getBytes()).getInt() & 0xffff0000);
         else if (commandLen == 3)
@@ -146,12 +140,12 @@ public class Command {
     }
 
     private Register getRegister(char regChar) {
-        return regChar == 'A' ? Ax : Bx;
+        return regChar == 'A' ? processor.AX : processor.BX;
     }
 
     private String nextWord() {
-        IC.incrementValue();
-        return new String(memory.getCodeWord(IC.getValue()));
+        processor.IC.incrementValue();
+        return new String(memory.getCodeWord(processor.IC.getValue()));
     }
 
     private char getRegChar(String command, int regIndex) {
@@ -163,7 +157,7 @@ public class Command {
 
         String hexValue = nextWord();
         getRegister(regChar).setValue(
-                ByteUtil.stringBytesToInt(hexValue)
+                ByteUtil.stringHexToInt(hexValue)
         );
     }
 
@@ -205,8 +199,8 @@ public class Command {
                 getRegister(r2).getValue() + getRegister(r1).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            ZF.setValue(0);
-        else ZF.setValue(1);
+            processor.ZF.setValue(0);
+        else processor.ZF.setValue(1);
     }
 
     private void SB(String command) {
@@ -217,8 +211,8 @@ public class Command {
                 getRegister(r1).getValue() - getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            ZF.setValue(0);
-        else ZF.setValue(1);
+            processor.ZF.setValue(0);
+        else processor.ZF.setValue(1);
     }
 
     private void ML(String command) {
@@ -229,8 +223,8 @@ public class Command {
                 getRegister(r1).getValue() * getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            ZF.setValue(0);
-        else ZF.setValue(1);
+            processor.ZF.setValue(0);
+        else processor.ZF.setValue(1);
     }
 
     private void DV(String command) {
@@ -241,8 +235,8 @@ public class Command {
                 getRegister(r1).getValue() / getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            ZF.setValue(0);
-        else ZF.setValue(1);
+            processor.ZF.setValue(0);
+        else processor.ZF.setValue(1);
     }
 
     private void CM(String command) {
@@ -251,14 +245,14 @@ public class Command {
 
         int diff = getRegister(r1).getValue() - getRegister(r2).getValue();
         if (diff == 0)
-            PR.setValue(0);
-        if (diff > 0)
-            PR.setValue(1);
-        if (diff < 0)
-            PR.setValue(2);
+            processor.PR.setValue(0);
+        else if (diff < 0)
+            processor.PR.setValue(2);
+        else if(diff > 0)
+            processor.PR.setValue(1);
         if(diff == 0)
-            ZF.setValue(0);
-        else ZF.setValue(1);
+            processor.ZF.setValue(0);
+        else processor.ZF.setValue(1);
     }
 
     private void AN(String command) {
@@ -269,8 +263,8 @@ public class Command {
                 getRegister(r1).getValue() & getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            ZF.setValue(0);
-        else ZF.setValue(1);
+            processor.ZF.setValue(0);
+        else processor.ZF.setValue(1);
     }
 
     private void XR(String command) {
@@ -281,8 +275,8 @@ public class Command {
                 getRegister(r1).getValue() ^ getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            ZF.setValue(0);
-        else ZF.setValue(1);
+            processor.ZF.setValue(0);
+        else processor.ZF.setValue(1);
     }
 
     private void OR(String command) {
@@ -293,8 +287,8 @@ public class Command {
                 getRegister(r1).getValue() ^ getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            ZF.setValue(0);
-        else ZF.setValue(1);
+            processor.ZF.setValue(0);
+        else processor.ZF.setValue(1);
     }
 
     private void NOT(String command) {
@@ -304,8 +298,8 @@ public class Command {
                 ~getRegister(r1).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            ZF.setValue(0);
-        else ZF.setValue(1);
+            processor.ZF.setValue(0);
+        else processor.ZF.setValue(1);
     }
 
     private void LS(String command) {
@@ -316,8 +310,8 @@ public class Command {
                 getRegister(r1).getValue() << getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            ZF.setValue(0);
-        else ZF.setValue(1);
+            processor.ZF.setValue(0);
+        else processor.ZF.setValue(1);
     }
 
     private void RS(String command) {
@@ -328,58 +322,70 @@ public class Command {
                 getRegister(r1).getValue() >> getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            ZF.setValue(0);
-        else ZF.setValue(1);
+            processor.ZF.setValue(0);
+        else processor.ZF.setValue(1);
     }
 
     private void JUMP() {
-        String hexValue = nextWord();
-        int page = ByteUtil.getIthByteFromString(hexValue, 2);
-        int word = ByteUtil.getIthByteFromString(hexValue, 3);
-        IC.setValue(page*pageSize+word);
+        String hexVal = nextWord();
+        processor.IC.setValue(
+                ByteUtil.stringHexToInt(hexVal)
+        );
     }
 
     private void JMPG() {
-        if(PR.getValue() == 1) {
-            JUMP();
+        String hexVal = nextWord();
+        if (processor.PR.getValue() == 0) {
+            processor.IC.setValue(
+                    ByteUtil.stringHexToInt(hexVal)
+            );
         }
-        else nextWord();
     }
 
     private void JMPL() {
-        if(PR.getValue() == 2) {
-            JUMP();
+        String hexVal = nextWord();
+        if (processor.PR.getValue() == 1) {
+            processor.IC.setValue(
+                    ByteUtil.stringHexToInt(hexVal)
+            );
         }
-        else nextWord();
     }
 
     private void JMPZ() {
-        if(ZF.getValue() == 0) {
-            JUMP();
+        String hexVal = nextWord();
+        if (processor.PR.getValue() == 2) {
+            processor.IC.setValue(
+                    ByteUtil.stringHexToInt(hexVal)
+            );
         }
-        else nextWord();
     }
 
     private void JPNZ() {
-        if(ZF.getValue() != 0) {
-            JUMP();
+        String hexVal = nextWord();
+        if (processor.ZF.getValue() != 0) {
+            processor.IC.setValue(
+                    ByteUtil.stringHexToInt(hexVal)
+            );
         }
-        else nextWord();
     }
 
     private void LOOP() {
-        Ax.setValue(
-                Ax.getValue() - 1
+        processor.AX.setValue(
+                processor.AX.getValue() - 1
         );
 
-        if (Ax.getValue() != 0) {
-            JUMP();
+        if (processor.AX.getValue() != 0) {
+            String hexVal = nextWord();
+            processor.IC.setValue(
+                    ByteUtil.stringHexToInt(hexVal)
+            );
         }
-        else nextWord();
     }
 
-    private void HALT() {
-        SI.setValue(3);
+    private void HALT(String command) {
+        processor.SI.setValue(
+                3
+        );
     }
 
     private void STSB(String command) {
@@ -391,53 +397,69 @@ public class Command {
     }
 
     private void PUSH() {
-        memory.putWordToMemory(SP.getValue()/16,SP.getValue()%16, Ax.getByteValue());
-        SP.incrementValue(4);
+        memory.putWordToMemory(processor.SP.getValue()/16,processor.SP.getValue()%16, processor.AX.getByteValue());
+        processor.SP.incrementValue(4);
     }
 
     private void POPP() {
-        Ax.setValue(memory.getWordFromMemory(SP.getValue()/16,SP.getValue()%16));
-        SP.incrementValue(-4);
+        processor.AX.setValue(memory.getWordFromMemory(processor.SP.getValue()/16,processor.SP.getValue()%16));
+        processor.SP.incrementValue(-4);
     }
 
     private void PRNT() {
-        SI.setValue(2);
+        processor.SI.setValue(
+                2
+        );
     }
 
     private void PNUM() {
-        SI.setValue(4);
+        processor.SI.setValue(
+                4
+        );
     }
 
     private void SCAN() {
-        SI.setValue(1);
+        processor.SI.setValue(
+                1
+        );
     }
 
     private void LOAD() {
-        SI.setValue(5);
+        processor.SI.setValue(
+                5
+        );
     }
 
     private void MONT() {
-        SI.setValue(10);
+        processor.SI.setValue(10);
     }
 
     private void UNMT() {
-        SI.setValue(11);
+        processor.SI.setValue(11);
     }
 
     private void POWR() {
-        SI.setValue(6);
+        processor.SI.setValue(
+                6
+        );
     }
 
     private void SVAL() {
-        SI.setValue(7);
+        processor.SI.setValue(
+                7
+        );
     }
 
     private void GVAL() {
-        SI.setValue(8);
+        processor.SI.setValue(
+                8
+        );
     }
 
     private void TYPE() {
-        SI.setValue(9);
+        processor.SI.setValue(
+                9
+        );
     }
 
 }

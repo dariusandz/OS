@@ -7,10 +7,12 @@ import java.util.List;
 
 public class ByteUtil {
 
-    public static int stringBytesToInt(String word) {
+    public static int stringHexToInt(String word) {
         byte[] b =  word.getBytes();
         return ByteBuffer.wrap(b).getInt();
     }
+
+    public static int byteToInt(byte[] bytes) { return ByteBuffer.wrap(bytes).getInt(); }
 
     public static byte[] intToBytes(int value) {
         return ByteBuffer.allocate(4).putInt(value).array();

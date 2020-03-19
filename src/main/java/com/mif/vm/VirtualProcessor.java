@@ -1,13 +1,11 @@
 package com.mif.vm;
 
-import com.mif.common.ByteUtil;
-import com.mif.common.Register;
+
 
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class VirtualProcessor extends Command {
-
 
     public VirtualProcessor(VirtualMemory memory) {
         super(memory);
@@ -17,18 +15,17 @@ public class VirtualProcessor extends Command {
         while (processSIValue()) {
             String command = getCommand();
             processCommand(command);
-            IC.incrementValue();
         }
     }
 
     private boolean processSIValue() {
-        switch (SI.getValue()) {
+        switch (processor.SI.getValue()) {
             case 1:
-                int letterCount = Bx.getValue();
-                byte[] address = Ax.getByteValue();
+                int letterCount = processor.BX.getValue();
+                byte[] address = processor.AX.getByteValue();
                 String outputText = "";
                 Scanner scan = new Scanner(System.in);
-                while(outputText.length() != letterCount){
+                while (outputText.length() != letterCount) {
                     System.out.println("Type in " + letterCount + " symbols");
                     outputText = scan.nextLine();
                 }
@@ -36,13 +33,13 @@ public class VirtualProcessor extends Command {
                 memory.putBytesToMemory(address[2], address[3], bytes, bytes.length);
                 break;
             case 2:
-                byte[] bytes1 = memory.getBytesFromMemory(Ax.getByteValue()[2], Ax.getByteValue()[3], Bx.getValue());
+                byte[] bytes1 = memory.getBytesFromMemory(processor.AX.getByteValue()[2], processor.AX.getByteValue()[3], processor.BX.getValue());
                 System.out.println(new String(bytes1, StandardCharsets.UTF_8));
                 break;
             case 3:
                 return false;
             case 4:
-                System.out.println(new String(memory.getWordFromMemory(Ax.getByteValue()[2], Ax.getByteValue()[3]), StandardCharsets.UTF_8));
+                System.out.println(new String(memory.getWordFromMemory(processor.AX.getByteValue()[2], processor.AX.getByteValue()[3]), StandardCharsets.UTF_8));
                 break;
             case 5:
                 // TODO LOAD command
@@ -62,7 +59,12 @@ public class VirtualProcessor extends Command {
         return true;
     }
 
-    private String getCommand() { return new String(memory.getCodeWord(IC.getValue()));
+    public void loadInstructionsFromFile(String fileName) {
+        memory.loadProgram(fileName);
+    }
+
+    private String getCommand() {
+        return new String(memory.getCodeWord(processor.IC.getValue()));
     }
 
 }

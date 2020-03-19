@@ -22,22 +22,24 @@ public class VirtualMemory implements IMemory {
     public static int pages = 16;
     public static int words = 16;
 
-    private PagingTable pagingTable = new PagingTable();
+    public PagingTable pagingTable = new PagingTable();
 
     public VirtualMemory() {
         pagingTable.requestPages(pages);
+        pagingTable.setPaging();
     }
 
-    // Gets a word from CODESEG
+    // Gets a word(command) to execute from CODESEG
     public byte[] getCodeWord(int nthWord) {
         return pagingTable.getWordFromMemory(CODESEG_START_PAGE, nthWord);
     }
 
-    // Gets a word from DATASEG
+    // Gets a word from memory
     public byte[] getWordFromMemory(int page, int word) {
         return pagingTable.getWordFromMemory(page, word);
     }
 
+    // Puts a register value to memory
     public byte[] getBytesFromMemory(int page, int word, int byteCount) { return pagingTable.getBytesFromMemory(page,word,byteCount); }
 
     // Puts a word to DATASEG from reg
@@ -46,6 +48,7 @@ public class VirtualMemory implements IMemory {
         pagingTable.putWordToMemory(page, word, byteValue);
     }
 
+    // Puts a word to memory
     public void putWordToMemory(int pageNum, int wordNum, byte[] word) {
         pagingTable.putWordToMemory(pageNum, wordNum, word);
     }
@@ -54,6 +57,7 @@ public class VirtualMemory implements IMemory {
         pagingTable.putBytesToMemory(pageNum, wordNum, words, byteCount);
     }
 
+    // Replaces 8byte hexes to 4byte hexes
     private byte[] replaceHex(String program) {
         List<Byte> byteList = new ArrayList<>();
 

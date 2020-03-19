@@ -43,6 +43,10 @@ public class Memory {
         return Arrays.copyOfRange(memory, page * pageSize + word * wordLen, page * pageSize + word * wordLen + wordLen);
     }
 
+    public byte[] getBytes(int page, int word, int byteCount) {
+        return Arrays.copyOfRange(memory, page * pageSize + word * wordLen, page * pageSize + word * wordLen + byteCount);
+    }
+
     public void putWord(int pageNum, int wordNum, byte[] word) {
         int byteIndex = 0;
         for (int i = pageNum * pageSize + wordNum * wordLen; i < pageNum * pageSize + wordNum * wordLen + wordLen; i++) {
@@ -50,4 +54,10 @@ public class Memory {
         }
     }
 
+    public void putBytes(int pageNum, int wordNum, byte[] words, int byteCount) {
+        int byteIndex = 0;
+        for (int i = pageNum * pageSize + wordNum * wordLen; i < pageNum * pageSize + wordNum * wordLen + byteCount; i++) {
+            memory[i] = words[byteIndex++];
+        }
+    }
 }

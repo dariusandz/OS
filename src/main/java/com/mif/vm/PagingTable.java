@@ -25,8 +25,17 @@ public class PagingTable {
         return memoryInstance.getWord(pageInMemory, word);
     }
 
+    public byte[] getBytesFromMemory(int page, int word, int byteCount) {
+        int pageInMemory = pageMap.get(page);
+        return memoryInstance.getBytes(pageInMemory, word, byteCount);
+    }
+
     public void putWordToMemory(int pageNum, int wordNum, byte[] word) {
         int pageInMemory = pageMap.get(pageNum);
         memoryInstance.putWord(pageInMemory, wordNum, word);
     }
+
+    public void putBytesToMemory(int pageNum, int wordNum, byte[] words, int byteCount) {
+        int pageInMemory = pageMap.get(pageNum);
+        memoryInstance.putBytes(pageInMemory, wordNum, words, byteCount);    }
 }

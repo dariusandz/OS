@@ -8,15 +8,21 @@ import static com.mif.vm.CMD.*;
 
 public class Command {
 
-    protected IMemory memory;
+    private static final int pageSize = 16;
+
+    IMemory memory;
     protected Register IC;
-    private Register Ax, Bx;
+    Register Ax, Bx, SP, PR, SI, ZF;
 
     public Command(VirtualMemory memory) {
         this.memory = memory;
         this.IC = new Register(0);
         this.Ax = new Register(0);
         this.Bx = new Register(0);
+        this.SP = new Register(0);
+        this.PR = new Register(0);
+        this.SI = new Register(0);
+        this.ZF = new Register(0);
     }
 
     protected void processCommand(String command) {
@@ -66,25 +72,25 @@ public class Command {
             RS(command);
         }
         else if (getCommandValue(command, 4) == JUMP.getValue()) {
-            JUMP(command);
+            JUMP();
         }
         else if (getCommandValue(command, 4) == JMPG.getValue()) {
-            JMPG(command);
+            JMPG();
         }
         else if (getCommandValue(command, 4) == JMPL.getValue()) {
-            JMPL(command);
+            JMPL();
         }
         else if (getCommandValue(command, 4) == JMPZ.getValue()) {
-            JMPZ(command);
+            JMPZ();
         }
         else if (getCommandValue(command, 4) == JPNZ.getValue()) {
-            JPNZ(command);
+            JPNZ();
         }
         else if (getCommandValue(command, 4) == LOOP.getValue()) {
-            LOOP(command);
+            LOOP();
         }
         else if (getCommandValue(command, 4) == HALT.getValue()) {
-            HALT(command);
+            HALT();
         }
         else if (getCommandValue(command, 4) == STSB.getValue()) {
             STSB(command);
@@ -93,40 +99,40 @@ public class Command {
             LDSB(command);
         }
         else if (getCommandValue(command, 4) == PUSH.getValue()) {
-            PUSH(command);
+            PUSH();
         }
         else if (getCommandValue(command, 4) == POPP.getValue()) {
-            POPP(command);
+            POPP();
         }
         else if (getCommandValue(command, 4) == PRNT.getValue()) {
-            PRNT(command);
+            PRNT();
         }
         else if (getCommandValue(command, 4) == PNUM.getValue()) {
-            PNUM(command);
+            PNUM();
         }
         else if (getCommandValue(command, 4) == SCAN.getValue()) {
-            SCAN(command);
+            SCAN();
         }
         else if (getCommandValue(command, 4) == LOAD.getValue()) {
-            LOAD(command);
+            LOAD();
         }
         else if (getCommandValue(command, 4) == MONT.getValue()) {
-            MONT(command);
+            MONT();
         }
-        else if (getCommandValue(command, 4) == UMNT.getValue()) {
-            UMNT(command);
+        else if (getCommandValue(command, 4) == UNMT.getValue()) {
+            UNMT();
         }
         else if (getCommandValue(command, 4) == POWR.getValue()) {
-            POWR(command);
+            POWR();
         }
         else if (getCommandValue(command, 4) == SVAL.getValue()) {
-            SVAL(command);
+            SVAL();
         }
         else if (getCommandValue(command, 4) == GVAL.getValue()) {
-            GVAL(command);
+            GVAL();
         }
         else if (getCommandValue(command, 4) == TYPE.getValue()) {
-            TYPE(command);
+            TYPE();
         }
     }
 
@@ -152,7 +158,7 @@ public class Command {
         return command.charAt(regIndex);
     }
 
-    private void LDN(String command) {
+    private void LDN(String command) { // i registra talpinamas skaicius
         char regChar = getRegChar(command, 3);
 
         String hexValue = nextWord();
@@ -161,17 +167,17 @@ public class Command {
         );
     }
 
-    private void LDM(String command) {
+    private void LDM(String command) { // i registra keliamas zodis is atminties
         char regChar = getRegChar(command, 3);
 
         String hexValue = nextWord();
         int page = ByteUtil.getIthByteFromString(hexValue, 2);
         int word = ByteUtil.getIthByteFromString(hexValue, 3);
 
-        memory.getWordFromMemory(page, word);
+        getRegister(regChar).setValue(memory.getWordFromMemory(page, word));
     }
 
-    private void SVR(String command) {
+    private void SVR(String command) { // i atminti talpinam registro reiksme
         char regChar = getRegChar(command, 3);
         int regVal = getRegister(regChar).getValue();
 
@@ -182,7 +188,7 @@ public class Command {
         memory.putValueToMemory(page, word, regVal);
     }
 
-    private void CP(String command) {
+    private void CP(String command) { // kopijuoja 2 registro reikmse i pirma
         char r1 = getRegChar(command, 2);
         char r2 = getRegChar(command, 3);
 
@@ -198,6 +204,9 @@ public class Command {
         getRegister(r1).setValue(
                 getRegister(r2).getValue() + getRegister(r1).getValue()
         );
+        if(getRegister(r1).getValue() == 0)
+            ZF.setValue(0);
+        else ZF.setValue(1);
     }
 
     private void SB(String command) {
@@ -207,6 +216,9 @@ public class Command {
         getRegister(r1).setValue(
                 getRegister(r1).getValue() - getRegister(r2).getValue()
         );
+        if(getRegister(r1).getValue() == 0)
+            ZF.setValue(0);
+        else ZF.setValue(1);
     }
 
     private void ML(String command) {
@@ -216,6 +228,9 @@ public class Command {
         getRegister(r1).setValue(
                 getRegister(r1).getValue() * getRegister(r2).getValue()
         );
+        if(getRegister(r1).getValue() == 0)
+            ZF.setValue(0);
+        else ZF.setValue(1);
     }
 
     private void DV(String command) {
@@ -225,6 +240,9 @@ public class Command {
         getRegister(r1).setValue(
                 getRegister(r1).getValue() / getRegister(r2).getValue()
         );
+        if(getRegister(r1).getValue() == 0)
+            ZF.setValue(0);
+        else ZF.setValue(1);
     }
 
     private void CM(String command) {
@@ -233,7 +251,14 @@ public class Command {
 
         int diff = getRegister(r1).getValue() - getRegister(r2).getValue();
         if (diff == 0)
-            ; // TODO set PR register value depending on above result
+            PR.setValue(0);
+        if (diff > 0)
+            PR.setValue(1);
+        if (diff < 0)
+            PR.setValue(2);
+        if(diff == 0)
+            ZF.setValue(0);
+        else ZF.setValue(1);
     }
 
     private void AN(String command) {
@@ -243,6 +268,9 @@ public class Command {
         getRegister(r1).setValue(
                 getRegister(r1).getValue() & getRegister(r2).getValue()
         );
+        if(getRegister(r1).getValue() == 0)
+            ZF.setValue(0);
+        else ZF.setValue(1);
     }
 
     private void XR(String command) {
@@ -252,6 +280,9 @@ public class Command {
         getRegister(r1).setValue(
                 getRegister(r1).getValue() ^ getRegister(r2).getValue()
         );
+        if(getRegister(r1).getValue() == 0)
+            ZF.setValue(0);
+        else ZF.setValue(1);
     }
 
     private void OR(String command) {
@@ -261,6 +292,9 @@ public class Command {
         getRegister(r1).setValue(
                 getRegister(r1).getValue() ^ getRegister(r2).getValue()
         );
+        if(getRegister(r1).getValue() == 0)
+            ZF.setValue(0);
+        else ZF.setValue(1);
     }
 
     private void NOT(String command) {
@@ -269,6 +303,9 @@ public class Command {
         getRegister(r1).setValue(
                 ~getRegister(r1).getValue()
         );
+        if(getRegister(r1).getValue() == 0)
+            ZF.setValue(0);
+        else ZF.setValue(1);
     }
 
     private void LS(String command) {
@@ -278,6 +315,9 @@ public class Command {
         getRegister(r1).setValue(
                 getRegister(r1).getValue() << getRegister(r2).getValue()
         );
+        if(getRegister(r1).getValue() == 0)
+            ZF.setValue(0);
+        else ZF.setValue(1);
     }
 
     private void RS(String command) {
@@ -287,102 +327,117 @@ public class Command {
         getRegister(r1).setValue(
                 getRegister(r1).getValue() >> getRegister(r2).getValue()
         );
+        if(getRegister(r1).getValue() == 0)
+            ZF.setValue(0);
+        else ZF.setValue(1);
     }
 
-    private void JUMP(String command) {
-        String hexVal = nextWord();
-        // TODO issiaiskink ka cia kaip
+    private void JUMP() {
+        String hexValue = nextWord();
+        int page = ByteUtil.getIthByteFromString(hexValue, 2);
+        int word = ByteUtil.getIthByteFromString(hexValue, 3);
+        IC.setValue(page*pageSize+word);
     }
 
-    private void JMPG(String command) {
-        // TODO
+    private void JMPG() {
+        if(PR.getValue() == 1) {
+            JUMP();
+        }
+        else nextWord();
     }
 
-    private void JMPL(String command) {
-        // TODO
+    private void JMPL() {
+        if(PR.getValue() == 2) {
+            JUMP();
+        }
+        else nextWord();
     }
 
-    private void JMPZ(String command) {
-        // TODO
+    private void JMPZ() {
+        if(ZF.getValue() == 0) {
+            JUMP();
+        }
+        else nextWord();
     }
 
-    private void JNPZ(String command) {
-        // TODO
+    private void JPNZ() {
+        if(ZF.getValue() != 0) {
+            JUMP();
+        }
+        else nextWord();
     }
 
-    private void JPNZ(String command) {
-        // TODO
-    }
-
-    private void LOOP(String command) {
+    private void LOOP() {
         Ax.setValue(
                 Ax.getValue() - 1
         );
 
         if (Ax.getValue() != 0) {
-            String hexVal = nextWord();
-            ;// TODO set IC to PA
+            JUMP();
         }
+        else nextWord();
     }
 
-    private void HALT(String command) {
-        // TODO set SI = 3
+    private void HALT() {
+        SI.setValue(3);
     }
 
     private void STSB(String command) {
-
+        // TODO
     }
 
     private void LDSB(String command) {
-
+        // TODO
     }
 
-    private void PUSH(String command) {
-
+    private void PUSH() {
+        memory.putWordToMemory(SP.getValue()/16,SP.getValue()%16, Ax.getByteValue());
+        SP.incrementValue(4);
     }
 
-    private void POPP(String command) {
-
+    private void POPP() {
+        Ax.setValue(memory.getWordFromMemory(SP.getValue()/16,SP.getValue()%16));
+        SP.incrementValue(-4);
     }
 
-    private void PRNT(String command) {
-
+    private void PRNT() {
+        SI.setValue(2);
     }
 
-    private void PNUM(String command) {
-
+    private void PNUM() {
+        SI.setValue(4);
     }
 
-    private void SCAN(String command) {
-
+    private void SCAN() {
+        SI.setValue(1);
     }
 
-    private void LOAD(String command) {
-
+    private void LOAD() {
+        SI.setValue(5);
     }
 
-    private void MONT(String command) {
-
+    private void MONT() {
+        SI.setValue(10);
     }
 
-    private void UMNT(String command) {
-
+    private void UNMT() {
+        SI.setValue(11);
     }
 
-    private void POWR(String command) {
-
+    private void POWR() {
+        SI.setValue(6);
     }
 
-    private void SVAL(String command) {
-
+    private void SVAL() {
+        SI.setValue(7);
     }
 
-    private void GVAL(String command) {
-
+    private void GVAL() {
+        SI.setValue(8);
     }
 
-    private void TYPE(String command) {
-
+    private void TYPE() {
+        SI.setValue(9);
     }
 
 }

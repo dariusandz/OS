@@ -10,7 +10,7 @@ public enum CMD {
     JUMP("JUMP"), JMPG("JMPG"), JMPL("JMPL"), JMPZ("JMPZ"), JPNZ("JPNZ"), LOOP("LOOP"), HALT("HALT"), STSB("STSB"), LDSB("LDSB"), // Valdymo perdavimo
     PUSH("PUSH"), POPP("POPP"), // Darbo su steku
     PRNT("PRNT"), PNUM("PNUM"), SCAN("SCAN"), LOAD("LOAD"), // Darbo su isvedimo ivedimo irenginiais
-    MONT("MONT"), UMNT("UMNT"), POWR("POWR"), SVAL("SVAL"), GVAL("GVAL"), TYPE("TYPE"); // Prietaisu instrukcijos
+    MONT("MONT"), UNMT("UNMT"), POWR("POWR"), SVAL("SVAL"), GVAL("GVAL"), TYPE("TYPE"); // Prietaisu instrukcijos
 
     private int value;
 

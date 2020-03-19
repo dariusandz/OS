@@ -38,6 +38,8 @@ public class VirtualMemory implements IMemory {
         return pagingTable.getWordFromMemory(page, word);
     }
 
+    public byte[] getBytesFromMemory(int page, int word, int byteCount) { return pagingTable.getBytesFromMemory(page,word,byteCount); }
+
     // Puts a word to DATASEG from reg
     public void putValueToMemory(int page, int word, int value) {
         byte[] byteValue = ByteUtil.intToBytes(value);
@@ -46,6 +48,10 @@ public class VirtualMemory implements IMemory {
 
     public void putWordToMemory(int pageNum, int wordNum, byte[] word) {
         pagingTable.putWordToMemory(pageNum, wordNum, word);
+    }
+
+    public void putBytesToMemory(int pageNum, int wordNum, byte[] words, int byteCount) {
+        pagingTable.putBytesToMemory(pageNum, wordNum, words, byteCount);
     }
 
     private byte[] replaceHex(String program) {
@@ -71,7 +77,7 @@ public class VirtualMemory implements IMemory {
         try {
             InputStream inputStream = VirtualMemory.class.getResourceAsStream(filePath);
             String programStr = IOUtils.toString(inputStream, "UTF-8");
-            programStr = programStr.replaceAll("\n", "").replace(" ", "");
+            programStr = programStr.replaceAll("\n", "").replace(" ", "").replace("\r","");
             putIntoMemory(replaceHex(programStr));
         } catch (IOException e) {
             e.printStackTrace();

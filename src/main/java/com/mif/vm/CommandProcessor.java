@@ -7,12 +7,12 @@ import com.mif.rm.Processor;
 import java.nio.ByteBuffer;
 import static com.mif.vm.CMD.*;
 
-public class Command {
+public class CommandProcessor {
 
-    VirtualMemory memory;
+    public VirtualMemory memory;
     protected Processor processor;
 
-    public Command(VirtualMemory memory) {
+    public CommandProcessor(VirtualMemory memory) {
         this.memory = memory;
         this.processor = Processor.getInstance();
     }

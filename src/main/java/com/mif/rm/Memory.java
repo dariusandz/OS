@@ -1,11 +1,8 @@
 package com.mif.rm;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
-public class Memory {
+public class  Memory {
 
     private static final int pageSize = 16;
     private static final int wordLen = 4;
@@ -59,5 +56,20 @@ public class Memory {
         for (int i = pageNum * pageSize + wordNum * wordLen; i < pageNum * pageSize + wordNum * wordLen + byteCount; i++) {
             memory[i] = words[byteIndex++];
         }
+    }
+
+    public void freeVMMemory(Map<Integer, Integer> pageMap, int ptrValue) {
+        for (Map.Entry<Integer, Integer> page: pageMap.entrySet()
+             ) {
+            occupiedPageNumber.remove(occupiedPageNumber.indexOf(page.getValue()));
+            for (int i = page.getValue() * pageSize; i < (page.getValue() + 1) * pageSize; i++) {
+                memory[i] = 0;
+            }
+        }
+        occupiedPageNumber.remove(occupiedPageNumber.indexOf(ptrValue));
+        for (int i =  ptrValue * pageSize; i < (ptrValue + 1) * pageSize; i++) {
+            memory[i] = 0;
+        }
+
     }
 }

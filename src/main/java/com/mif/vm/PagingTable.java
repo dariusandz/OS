@@ -57,4 +57,8 @@ public class PagingTable {
     public void putBytesToMemory(int pageNum, int wordNum, byte[] words, int byteCount) {
         int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(PTR.getValue(), pageNum));
         memoryInstance.putBytes(pageInMemory, wordNum, words, byteCount);    }
+
+    public void freeMemory() {
+        memoryInstance.freeVMMemory(pageMap, PTR.getValue());
+    }
 }

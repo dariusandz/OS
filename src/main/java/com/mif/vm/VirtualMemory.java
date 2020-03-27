@@ -103,4 +103,8 @@ public class VirtualMemory implements IMemory {
             }
         }
     }
+
+    public void freeMemory() {
+        pagingTable.freeMemory();
+    }
 }

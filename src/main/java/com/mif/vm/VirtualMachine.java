@@ -3,10 +3,11 @@ package com.mif.vm;
 public class VirtualMachine {
 
     private VirtualProcessor virtualProcessor;
+    public VirtualMemory virtualMemory;
 
     public VirtualMachine() {
-        VirtualMemory virtualMemory = new VirtualMemory();
-        this.virtualProcessor = new VirtualProcessor(new VirtualMemory());
+        virtualMemory = new VirtualMemory();
+        this.virtualProcessor = new VirtualProcessor(virtualMemory);
     }
 
     public void run() {
@@ -15,5 +16,9 @@ public class VirtualMachine {
 
     public void loadProgram(String filename) {
         virtualProcessor.loadInstructionsFromFile(filename);
+    }
+
+    public void freeMemory() {
+        virtualMemory.freeMemory();
     }
 }

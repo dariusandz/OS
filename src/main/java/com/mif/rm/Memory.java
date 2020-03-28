@@ -59,8 +59,7 @@ public class  Memory {
     }
 
     public void freeVMMemory(Map<Integer, Integer> pageMap, int ptrValue) {
-        for (Map.Entry<Integer, Integer> page: pageMap.entrySet()
-             ) {
+        for (Map.Entry<Integer, Integer> page: pageMap.entrySet()) {
             occupiedPageNumber.remove(occupiedPageNumber.indexOf(page.getValue()));
             for (int i = page.getValue() * pageSize; i < (page.getValue() + 1) * pageSize; i++) {
                 memory[i] = 0;

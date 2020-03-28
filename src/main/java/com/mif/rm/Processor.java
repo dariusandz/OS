@@ -57,7 +57,7 @@ public class Processor {
         while (true) {
             System.out.println("Type in the number for which virtual machine to start");
             outputText = parseInt(scan.nextLine());
-            switch (outputText){
+            switch (outputText) {
                 case 1:
                     VirtualMachine vm = new VirtualMachine();
                     vm.loadProgram("/pr1.txt");

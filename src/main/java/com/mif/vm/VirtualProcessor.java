@@ -12,7 +12,7 @@ public class VirtualProcessor extends CommandProcessor {
         while (true){
             String command = getCommand();
             processCommand(command);
-            if(!(Processor.processSIValue(processor)))
+            if(!(Processor.processSIValue(processor, memory)))
                 break;
         }
     }

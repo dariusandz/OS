@@ -18,7 +18,6 @@ public class Processor {
     private static Processor processor = null;
 
     public ProcessorMode processorMode;
-    static VirtualMemory virtualMemory;
     public Register PTR, AX, BX;
     public Register IC, PI, SI, TI, PR, SP, MODE, ES, DI, ZF;
     Memory memory;
@@ -66,16 +65,15 @@ public class Processor {
                 case 1:
                     VirtualMachine vm = new VirtualMachine();
                     vm.loadProgram("/pr1.txt");
-                    virtualMemory = vm.virtualMemory;
                     vm.run();
                     vm.freeMemory();
                     break;
                 case 2:
                     VirtualMachine vm2 = new VirtualMachine();
                     vm2.loadProgram("/pr2.txt");
-                    virtualMemory = vm2.virtualMemory;
                     vm2.run();
                     vm2.freeMemory();
+                    break;
                 default:
 
             }
@@ -83,7 +81,7 @@ public class Processor {
         }
     }
 
-    public static boolean processSIValue(Processor processor) {
+    public static boolean processSIValue(Processor processor, VirtualMemory virtualMemory) {
         switch (processor.SI.getValue()) { //TODO needs to be redone?
             case 1:
                 int letterCount = processor.BX.getValue();

@@ -44,4 +44,5 @@ public class ByteUtil {
             bytes[i] = byteList.get(i).byteValue();
         return bytes;
     }
+
 }

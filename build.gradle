@@ -1,17 +1,18 @@
 plugins {
     id 'java'
+    id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.8'
 }
 
 javafx {
     version = "14"
-    modules = [ 'javafx.controls' ]
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
 group 'org.example'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 11
 
 repositories {
     mavenCentral()
@@ -19,5 +20,8 @@ repositories {
 
 dependencies {
     implementation 'commons-io:commons-io:2.6'
+//    implementation 'org.apache.commons:commons-lang3:3.10'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
+
+mainClassName = 'com.mif.Main'

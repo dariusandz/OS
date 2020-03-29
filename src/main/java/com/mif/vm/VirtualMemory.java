@@ -1,6 +1,7 @@
 package com.mif.vm;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,9 +25,10 @@ public class VirtualMemory implements IMemory {
 
     public PagingTable pagingTable = new PagingTable();
 
-    public VirtualMemory() {
+    public VirtualMemory(List<String> params) {
         pagingTable.requestPages(pages);
         pagingTable.setPaging();
+        putParamsIntoMemory(params);
     }
 
     // Gets a word(command) to execute from CODESEG
@@ -101,6 +103,24 @@ public class VirtualMemory implements IMemory {
                 byte[] hexWord = Arrays.copyOfRange(byteCode, i * wordSize, i * wordSize + wordSize);
                 putWordToMemory(CODESEG_START_PAGE, i, hexWord);
             }
+        }
+    }
+
+    public void putParamsIntoMemory(List<String> params) {
+        if (params.isEmpty())
+            return;
+
+        StringBuilder longStringOfParameters = new StringBuilder();
+        params.stream()
+            .forEach(param -> longStringOfParameters.append(param));
+
+        int index = 0;
+        while (index < longStringOfParameters.length() / wordSize) {
+            String param = longStringOfParameters.substring(
+                    index, Math.min(longStringOfParameters.length(), ++index * wordSize)
+            );
+            byte[] bytes = param.getBytes(StandardCharsets.UTF_8);
+            putWordToMemory(PARAMSEG_START_PAGE, index, param.getBytes(StandardCharsets.UTF_8));
         }
     }
 

@@ -1,18 +1,15 @@
 package com.mif.vm;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
+import java.util.ArrayList;
+import java.util.List;
 
-public class VirtualMachine extends Application {
+public class VirtualMachine {
 
-    private static int vmCount;
-
-    private VirtualProcessor virtualProcessor;
+    public VirtualProcessor virtualProcessor;
     public VirtualMemory virtualMemory;
 
-    public VirtualMachine() {
-        this.vmCount++;
-        this.virtualMemory = new VirtualMemory();
+    public VirtualMachine(List<String> params) {
+        this.virtualMemory = new VirtualMemory(params);
         this.virtualProcessor = new VirtualProcessor(virtualMemory);
     }
 
@@ -26,11 +23,5 @@ public class VirtualMachine extends Application {
 
     public void freeMemory() {
         virtualMemory.freeMemory();
-    }
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        primaryStage.setTitle("Virtual mašina nr. " + vmCount);
-        primaryStage.show();
     }
 }

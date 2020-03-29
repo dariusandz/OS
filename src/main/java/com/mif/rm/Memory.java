@@ -4,9 +4,9 @@ import java.util.*;
 
 public class  Memory {
 
-    private static final int pageSize = 16;
-    private static final int wordLen = 4;
-    private static final int defaultMemorySize = 1024;
+    public static final int pageSize = 16;
+    public static final int wordLen = 4;
+    public static final int defaultMemorySize = 1024;
 
     private static Memory globalMemory = null;
 
@@ -69,6 +69,5 @@ public class  Memory {
         for (int i =  ptrValue * pageSize; i < (ptrValue + 1) * pageSize; i++) {
             memory[i] = 0;
         }
-
     }
 }

@@ -20,8 +20,8 @@ public class Processor {
     public ProcessorMode processorMode;
     public Register PTR, AX, BX;
     public Register IC, PI, SI, TI, PR, SP, MODE, ES, DI, ZF;
-    Memory memory;
     static List<Device> devices;
+    private Memory memory;
 
     public static Processor getInstance() {
         if (processor == null)
@@ -30,11 +30,11 @@ public class Processor {
         return processor;
     }
 
-    Processor() {
+    private Processor() {
+        this.memory = memory.getInstance();
+        this.devices = new ArrayList<>();
         this.processorMode = ProcessorMode.SUPERVISOR;
         initializeRegisters();
-        memory = memory.getInstance();
-        devices = new ArrayList<>();
     }
 
     private Processor(ProcessorMode mode) { this.processorMode = mode; }
@@ -55,42 +55,41 @@ public class Processor {
         ZF = new Register();
     }
 
-    void run() {
-        int outputText;
-        Scanner scan = new Scanner(System.in);
-        while (true) {
-            System.out.println("Type in the number for which virtual machine to start");
-            outputText = parseInt(scan.nextLine());
-            switch (outputText) {
-                case 1:
-                    VirtualMachine vm = new VirtualMachine();
-                    vm.loadProgram("/pr1.txt");
-                    vm.run();
-                    vm.freeMemory();
-                    break;
-                case 2:
-                    VirtualMachine vm2 = new VirtualMachine();
-                    vm2.loadProgram("/pr2.txt");
-                    vm2.run();
-                    vm2.freeMemory();
-                    break;
-                default:
-
-            }
-
-        }
-    }
+//    void run() {
+//        int outputText;
+////        Scanner scan = new Scanner(System.in);
+//        while (true) {
+//            System.out.println("Type in the number for which virtual machine to start");
+//            outputText = 1;//parseInt(scan.nextLine());
+//            switch (outputText) {
+//                case 1:
+//                    VirtualMachine vm = new VirtualMachine();
+//                    vm.loadProgram("/pr1.txt");
+//                    vm.run();
+//                    vm.freeMemory();
+//                    break;
+//                case 2:
+//                    VirtualMachine vm2 = new VirtualMachine();
+//                    vm2.loadProgram("/pr2.txt");
+//                    vm2.run();
+//                    vm2.freeMemory();
+//                    break;
+//                default:
+//
+//            }
+//        }
+//    }
 
     public static boolean processSIValue(Processor processor, VirtualMemory virtualMemory) {
         switch (processor.SI.getValue()) { //TODO needs to be redone?
             case 1:
                 int letterCount = processor.BX.getValue();
                 byte[] address = processor.AX.getByteValue();
-                String outputText = "";
+                String outputText = "1234567";
                 Scanner scan = new Scanner(System.in);
                 while (outputText.length() != letterCount) {
                     System.out.println("Type in " + letterCount + " symbols");
-                    outputText = scan.nextLine();
+//                    outputText = scan.nextLine();
                 }
                 byte[] bytes = outputText.getBytes(StandardCharsets.UTF_8);
                 virtualMemory.putBytesToMemory(address[2], address[3], bytes, bytes.length);

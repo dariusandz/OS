@@ -4,12 +4,12 @@ import com.mif.rm.Memory;
 
 import java.nio.ByteBuffer;
 
-public class TablePage {
+public class MemoryTableRow {
 //TODO make hex values
     public Integer pageNumber;
     public Integer[] wordIntValues = new Integer[Memory.pageSize];
 
-    public TablePage(int pageNumber) { this.pageNumber = pageNumber; }
+    public MemoryTableRow(int pageNumber) { this.pageNumber = pageNumber; }
 
     public Integer[] getValues() { return wordIntValues; }
 

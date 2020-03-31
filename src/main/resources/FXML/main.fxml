@@ -33,11 +33,7 @@
             </VBox>
             <VBox id="register-container" fx:id="registersContainer" fillWidth="false" layoutX="567.0" layoutY="-1.0" maxHeight="-Infinity" prefHeight="405.0" prefWidth="232.0">
                <children>
-                  <HBox prefHeight="20.0" prefWidth="231.0">
-                     <children>
-                        <TextArea editable="false" prefHeight="404.0" prefWidth="231.0" text="REGISTERS" />
-                     </children>
-                  </HBox>
+                  <TableView fx:id="registerTable" prefHeight="405.0" prefWidth="231.0" VBox.vgrow="ALWAYS" />
                </children>
             </VBox>
             <VBox layoutX="225.0">

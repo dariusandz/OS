@@ -1,6 +1,7 @@
 package com.mif.rm;
 
-import com.mif.FXModel.TablePage;
+import com.mif.FXModel.MemoryTableRow;
+import com.mif.FXModel.RegisterTableRow;
 import com.mif.Main;
 import com.mif.common.ByteUtil;
 import com.mif.common.FXUtil;
@@ -16,8 +17,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -101,14 +102,14 @@ public class RealMachine {
     }
 
     private void refreshMemoryTable() {
-        for (int i = 0; i < tablePages.size(); i++) {
-            TablePage memoryPage = tablePages.get(i);
+        for (int i = 0; i < memoryTableRows.size(); i++) {
+            MemoryTableRow memoryPage = memoryTableRows.get(i);
             for (int j = 0; j < memoryPage.wordIntValues.length; j++) {
                 byte[] memoryWordBytes = memory.getWord(i, j);
                 int memoryWordInt = ByteUtil.byteToInt(memoryWordBytes);
                 if (memoryPage.getWord(j) != memoryWordInt) {
                     memoryPage.setWord(j, memoryWordInt);
-                    tablePages.set(i, memoryPage);
+                    memoryTableRows.set(i, memoryPage);
                 }
             }
         }
@@ -156,25 +157,39 @@ public class RealMachine {
     private VBox registersContainer;
 
     @FXML
-    private AnchorPane commandContainer;
+    private TableView registerTable;
+
+    private List<RegisterTableRow> registerTableRows = new ArrayList<>();
 
     private void renderRegisters() {
+        registerTable.setPrefWidth(registersContainer.getPrefWidth());
+
+        TableColumn<RegisterTableRow, String> column1 = new TableColumn<>("Register");
+        column1.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        column1.setSortable(false);
+        column1.setEditable(false);
+
+        TableColumn<RegisterTableRow, String> column2 = new TableColumn<>("Value");
+        column2.setCellValueFactory(new PropertyValueFactory<>("value"));
+
+        column2.setSortable(false);
+        column2.setEditable(false);
+
+        registerTable.getColumns().addAll(column1, column2);
+
         for (RegisterInstance readonlyRegister : readonlyRegisters) {
-
-            TextArea registerText = new TextArea(readonlyRegister.field.getName() + " "
-                    + readonlyRegister.register.getValue());
-
-            registerText.setEditable(false);
-
-            HBox registerHbox = new HBox(registerText);
-            registerHbox.setPrefWidth(registersContainer.getPrefWidth());
-
-            registersContainer.getChildren().add(
-                registerHbox
+            RegisterTableRow registerTableRow = new RegisterTableRow(
+                    readonlyRegister.field.getName(),
+                    readonlyRegister.register.getValue()
             );
+
+            registerTableRows.add(registerTableRow);
+
+            registerTable.getItems().add(registerTableRow);
         }
 
-        FXUtil.fitChildrenToContainer(registersContainer);
+        FXUtil.resizeEquallyTableColumns(memoryTable);
     }
 
     @FXML
@@ -183,7 +198,7 @@ public class RealMachine {
     @FXML
     private AnchorPane memoryTablePane;
 
-    private List<TablePage> tablePages = new ArrayList<>();
+    private List<MemoryTableRow> memoryTableRows = new ArrayList<>();
 
     private void renderMemory() {
 //        TableColumn<TablePage, TablePage> indexCol = new TableColumn<>("Page number");
@@ -193,16 +208,16 @@ public class RealMachine {
         memoryTable.setPrefWidth(memoryTablePane.getPrefWidth());
 
         for (int col = 0; col < Memory.pageSize; col++) {
-            TableColumn<TablePage, Integer> column = new TableColumn<>(String.valueOf(col));
-            column.setCellValueFactory(FXUtil.createArrayValueFactory(TablePage::getValues, col));
+            TableColumn<MemoryTableRow, Integer> column = new TableColumn<>(String.valueOf(col));
+            column.setCellValueFactory(FXUtil.createArrayValueFactory(MemoryTableRow::getValues, col));
 
-            TablePage tablePage = new TablePage(col);
+            MemoryTableRow memoryTableRow = new MemoryTableRow(col);
             for (int row = 0; row < Memory.defaultMemorySize / (Memory.pageSize * Memory.wordLen); row++) {
-                tablePage.add(row, memory.getWord(col, row));
+                memoryTableRow.add(row, memory.getWord(col, row));
             }
 
-            tablePages.add(tablePage);
-            memoryTable.getItems().add(tablePage);
+            memoryTableRows.add(memoryTableRow);
+            memoryTable.getItems().add(memoryTableRow);
 
             column.setSortable(false);
             column.setEditable(false);

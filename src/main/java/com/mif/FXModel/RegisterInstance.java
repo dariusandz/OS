@@ -1,6 +1,6 @@
 package com.mif.FXModel;
 
-import com.mif.common.Register;
+import com.mif.rm.Register;
 
 import java.lang.reflect.Field;
 

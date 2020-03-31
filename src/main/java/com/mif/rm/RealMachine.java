@@ -1,11 +1,11 @@
 package com.mif.rm;
 
+import com.mif.FXModel.CommandTableRow;
 import com.mif.FXModel.MemoryTableRow;
 import com.mif.FXModel.RegisterTableRow;
 import com.mif.Main;
 import com.mif.common.ByteUtil;
 import com.mif.common.FXUtil;
-import com.mif.common.Register;
 import com.mif.FXModel.RegisterInstance;
 import com.mif.vm.VirtualMachine;
 import javafx.event.ActionEvent;
@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -25,16 +26,26 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.stream.IntStream;
 
 public class RealMachine {
 
     private Processor processor;
     private Memory memory;
 
-    private List<RegisterInstance> readonlyRegisters = new ArrayList<>();
+    private VirtualMachine currentVm = null;
+    private Long idOfRunningMachine;
+    private List<VirtualMachine> virtualMachines = new ArrayList<>();
+    private Map<Long, List<String>> vmCommands = new HashMap<>();
 
-    public RealMachine(Stage primaryStage, String params) {
+    private List<RegisterInstance> readonlyRegisters;
+
+    public RealMachine(Stage primaryStage) {
         this.memory = Memory.getInstance();
         this.processor = Processor.getInstance();
         this.getRegisters();
@@ -42,6 +53,7 @@ public class RealMachine {
     }
 
     private void getRegisters() {
+        readonlyRegisters = new ArrayList<>();
         Field[] fields = processor.getClass().getDeclaredFields();
         for (Field field : fields) {
             if (field.getType().equals(Register.class)) {
@@ -59,46 +71,83 @@ public class RealMachine {
         }
     }
 
-    // TODO cia reiktu kazkaip suglvot kad is cia procesintu komandas (butu whilas)
-    //  kad po kiekvienos komandos sustotu ir butu galima step over daryt ir updatint UI
-    public void run(String runCommand) {
-        String[] command = runCommand.split(" ");
-        String program = command[0];
-        List<String> params = new ArrayList<>();
 
-        if (command.length > 1) {
-            for (int i = 1; i < command.length; i++) {
-                params.add(command[i]);
+    @FXML
+    private Button stepOverBtn;
+
+    @FXML
+    private void stepOver() {
+        step();
+    }
+
+    public void step() {
+        if (currentVm != null) {
+            currentVm = getRunningVmById(idOfRunningMachine);
+
+            currentVm.processCommand();
+
+            if (!processor.processSIValue(currentVm.virtualMemory)) {
+                // TODO clean up virtual machine from real machine?
+                currentVm.freeMemory();
+                virtualMachines.remove(currentVm);
+
+                // TODO temporary, kol gali veikti tik viena VM
+                currentVm = null;
+
+                addToOutput("Virtuali masina su id [" + idOfRunningMachine + "] baige darba.");
+            }
+
+            updateUI();
+        }
+    }
+
+    private void run(String runCommand) {
+        initializeVirtualMachine(runCommand);
+        renderCommandTable();
+    }
+
+    private VirtualMachine getRunningVmById(Long id) {
+        OptionalInt optIndex = IntStream.range(0, virtualMachines.size())
+            .filter(ind -> idOfRunningMachine == virtualMachines.get(ind).getId())
+            .findFirst();
+
+        if (optIndex.isEmpty()) {
+            return null;
+        }
+
+        return virtualMachines.get(optIndex.getAsInt());
+    }
+
+    private void initializeVirtualMachine(String command) {
+        String[] splitCommand = command.split(" ");
+        List<String> params = getParams(splitCommand);
+        String programFileName = splitCommand[0];
+
+        VirtualMachine virtualMachine = new VirtualMachine(programFileName, params);
+        Long id = virtualMachine.getId();
+        List<String> virtualMachinesCommands = virtualMachine.loadProgram();
+
+        this.vmCommands.put(id, virtualMachinesCommands);
+        this.idOfRunningMachine = virtualMachine.getId();
+        this.virtualMachines.add(virtualMachine);
+        // TODO temporary, kol gali veikti tik viena VM
+        this.currentVm = virtualMachine;
+    }
+
+    private List<String> getParams(String[] splitCommand) {
+        List<String> params = new ArrayList<>();
+        if (splitCommand.length > 1) {
+            for (int i = 1; i < splitCommand.length; i++) {
+                params.add(splitCommand[i]);
             }
         }
+        return params;
+    }
 
-        switch (program) {
-            case "./pr1.txt":
-                VirtualMachine vm = new VirtualMachine(params);
-                vm.loadProgram("/pr1.txt");
-                while (true) {
-                    processor = vm.processCommand(vm.getCommand());
-                    // TODO updatinti cia gui, kad rodytu komandas
-                    if(!(Processor.processSIValue(processor, vm.virtualMemory)))
-                        break;
-                }
-                refreshMemoryTable();
-                vm.freeMemory();
-                break;
-            case "./pr2.txt":
-                VirtualMachine vm2 = new VirtualMachine(params);
-                vm2.loadProgram("/pr2.txt");
-                while (true) {
-                    processor = vm2.processCommand(vm2.getCommand());
-                    if(!(Processor.processSIValue(processor, vm2.virtualMemory)))
-                        break;
-                }
-                refreshMemoryTable();
-                vm2.freeMemory();
-                break;
-            default:
-                return;
-        }
+    private void updateUI() {
+        refreshMemoryTable();
+        refreshRegisters();
+        setNextCommand();
     }
 
     private void refreshMemoryTable() {
@@ -114,6 +163,32 @@ public class RealMachine {
             }
         }
         memoryTable.refresh();
+    }
+
+    private void refreshRegisters() {
+        getRegisters();
+        readonlyRegisters.forEach(reg -> {
+            Optional<RegisterTableRow> row =
+                    registerTableRows.stream()
+                        .filter(r -> r.getName().equals(reg.field.getName()))
+                        .findFirst();
+
+            if (row.isPresent() && row.get().getValue() != reg.register.getValue()) {
+                int i = registerTableRows.indexOf(row.get());
+                row.get().setValue(reg.register.getValue());
+                registerTableRows.set(i, row.get());
+            }
+        });
+        registerTable.refresh();
+    }
+
+    // TODO kai komanda 8 baitu, IC painkrementina po 2, nors UI si komanda tik vienoje eiluteje - del to skipina
+    private void setNextCommand() {
+        int commandIndex = processor.IC.getValue();
+        commandTable.getSelectionModel().clearSelection();
+        commandTable.requestFocus();
+        commandTable.getSelectionModel().select(commandIndex);
+        commandTable.getFocusModel().focus(commandIndex);
     }
 
     private void initializeStage(Stage primaryStage) {
@@ -151,6 +226,34 @@ public class RealMachine {
         if (input.contains("./")) {
             run(input);
         }
+    }
+
+    @FXML
+    private AnchorPane commandContainer;
+
+    @FXML
+    private TableView commandTable;
+
+    private void renderCommandTable() {
+        List<String> currentCommands = vmCommands.get(this.idOfRunningMachine);
+
+        commandTable.setPrefWidth(commandContainer.getPrefWidth());
+
+        TableColumn<CommandTableRow, String> column = new TableColumn<>("Command");
+        column.setCellValueFactory(new PropertyValueFactory<>("command"));
+
+        column.setSortable(false);
+        column.setEditable(false);
+
+        commandTable.getColumns().add(column);
+
+        currentCommands.forEach(command -> {
+            CommandTableRow tableRow = new CommandTableRow(command);
+            commandTable.getItems().add(tableRow);
+        });
+
+        setNextCommand();
+        FXUtil.resizeEquallyTableColumns(commandTable);
     }
 
     @FXML

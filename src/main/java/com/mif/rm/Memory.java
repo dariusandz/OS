@@ -2,13 +2,13 @@ package com.mif.rm;
 
 import java.util.*;
 
-public class  Memory {
+public class Memory {
 
     public static final int pageSize = 16;
     public static final int wordLen = 4;
     public static final int defaultMemorySize = 1024;
 
-    private static Memory globalMemory = null;
+    private static Memory globalMemory = getInstance();
 
     private List<Integer> occupiedPageNumber = new ArrayList<>();
     private byte[] memory;

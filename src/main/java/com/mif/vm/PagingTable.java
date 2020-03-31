@@ -1,7 +1,7 @@
 package com.mif.vm;
 
 import com.mif.common.ByteUtil;
-import com.mif.common.Register;
+import com.mif.rm.Register;
 import com.mif.rm.Memory;
 
 import java.util.HashMap;

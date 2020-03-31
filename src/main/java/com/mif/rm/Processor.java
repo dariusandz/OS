@@ -1,11 +1,7 @@
 package com.mif.rm;
 
-import com.mif.common.Register;
-import com.mif.vm.CMD;
-import com.mif.vm.VirtualMachine;
 import com.mif.vm.VirtualMemory;
 
-import javax.swing.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,13 +11,12 @@ import static java.lang.Integer.parseInt;
 
 public class Processor {
 
-    private static Processor processor = null;
+    private static Processor processor = getInstance();
 
-    public ProcessorMode processorMode;
-    public Register PTR, AX, BX;
-    public Register IC, PI, SI, TI, PR, SP, MODE, ES, DI, ZF;
-    static List<Device> devices;
-    private Memory memory;
+    public static ProcessorMode processorMode;
+    public static Register PTR, AX, BX;
+    public static Register IC, PI, SI, TI, PR, SP, MODE, ES, DI, ZF;
+    public static List<Device> devices;
 
     public static Processor getInstance() {
         if (processor == null)
@@ -31,7 +26,6 @@ public class Processor {
     }
 
     private Processor() {
-        this.memory = memory.getInstance();
         this.devices = new ArrayList<>();
         this.processorMode = ProcessorMode.SUPERVISOR;
         initializeRegisters();
@@ -80,7 +74,7 @@ public class Processor {
 //        }
 //    }
 
-    public static boolean processSIValue(Processor processor, VirtualMemory virtualMemory) {
+    public boolean processSIValue(VirtualMemory virtualMemory) {
         switch (processor.SI.getValue()) { //TODO needs to be redone?
             case 1:
                 int letterCount = processor.BX.getValue();

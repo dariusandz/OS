@@ -1,6 +1,6 @@
 package com.mif.vm;
 
-import com.mif.common.Register;
+import com.mif.rm.Register;
 import com.mif.common.ByteUtil;
 import com.mif.rm.Processor;
 
@@ -17,7 +17,7 @@ public class CommandProcessor {
         this.processor = Processor.getInstance();
     }
 
-    protected Processor processCommand(String command) {
+    protected String processCommand(String command) {
         if (getCommandByteValue(command, 3) == LDN.getValue()) {
             LDN(command);
         }
@@ -128,7 +128,7 @@ public class CommandProcessor {
         }
 
         processor.IC.incrementValue();
-        return processor;
+        return command;
     }
 
     private int getCommandByteValue(String command, int commandLen) {

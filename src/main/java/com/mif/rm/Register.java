@@ -1,4 +1,4 @@
-package com.mif.common;
+package com.mif.rm;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

@@ -76,7 +76,7 @@ public class Main extends Application {
     }
 
     private void bootRealMachine(Stage primaryStage) {
-        RealMachine rm = new RealMachine(primaryStage, this.params);
+        RealMachine rm = new RealMachine(primaryStage);
 //        rm.run(primaryStage);
     }
 }

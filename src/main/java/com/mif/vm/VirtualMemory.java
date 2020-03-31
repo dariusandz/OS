@@ -80,8 +80,9 @@ public class VirtualMemory implements IMemory {
 
     // Loads a program from file into string
     public void loadProgram(String filePath) {
+        InputStream inputStream = null;
         try {
-            InputStream inputStream = VirtualMemory.class.getResourceAsStream(filePath);
+            inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
             String programStr = IOUtils.toString(inputStream, "UTF-8");
             programStr = programStr.replaceAll("\n", "").replace(" ", "").replace("\r","");
             putIntoMemory(replaceHex(programStr));

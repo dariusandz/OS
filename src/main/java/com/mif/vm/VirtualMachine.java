@@ -1,6 +1,7 @@
 package com.mif.vm;
 
-import java.util.ArrayList;
+import com.mif.rm.Processor;
+
 import java.util.List;
 
 public class VirtualMachine {
@@ -13,8 +14,12 @@ public class VirtualMachine {
         this.virtualProcessor = new VirtualProcessor(virtualMemory);
     }
 
-    public void run() {
-        virtualProcessor.runProgram();
+    public String getCommand() {
+        return virtualProcessor.getCommand();
+    }
+
+    public Processor processCommand(String command) {
+        return virtualProcessor.processCommand(command);
     }
 
     public void loadProgram(String filename) {

@@ -17,7 +17,7 @@ public class CommandProcessor {
         this.processor = Processor.getInstance();
     }
 
-    protected void processCommand(String command) {
+    protected Processor processCommand(String command) {
         if (getCommandByteValue(command, 3) == LDN.getValue()) {
             LDN(command);
         }
@@ -128,6 +128,7 @@ public class CommandProcessor {
         }
 
         processor.IC.incrementValue();
+        return processor;
     }
 
     private int getCommandByteValue(String command, int commandLen) {

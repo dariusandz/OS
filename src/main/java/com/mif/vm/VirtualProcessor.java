@@ -8,20 +8,11 @@ public class VirtualProcessor extends CommandProcessor {
         super(memory);
     }
 
-    public void runProgram() {
-        while (true){
-            String command = getCommand();
-            processCommand(command);
-            if(!(Processor.processSIValue(processor, memory)))
-                break;
-        }
-    }
-
     public void loadInstructionsFromFile(String fileName) {
         memory.loadProgram(fileName);
     }
 
-    private String getCommand() {
+    String getCommand() {
         return new String(memory.getCodeWord(processor.IC.getValue()));
     }
 

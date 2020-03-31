@@ -5,7 +5,7 @@ import com.mif.rm.Memory;
 import java.nio.ByteBuffer;
 
 public class TablePage {
-
+//TODO make hex values
     public Integer pageNumber;
     public Integer[] wordIntValues = new Integer[Memory.pageSize];
 

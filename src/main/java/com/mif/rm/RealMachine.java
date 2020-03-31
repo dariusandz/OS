@@ -75,15 +75,26 @@ public class RealMachine {
             case "./pr1.txt":
                 VirtualMachine vm = new VirtualMachine(params);
                 vm.loadProgram("/pr1.txt");
+                while (true) {
+                    processor = vm.processCommand(vm.getCommand());
+                    // TODO updatinti cia gui, kad rodytu komandas
+                    if(!(Processor.processSIValue(processor, vm.virtualMemory)))
+                        break;
+                }
                 refreshMemoryTable();
                 vm.freeMemory();
-
+                break;
             case "./pr2.txt":
                 VirtualMachine vm2 = new VirtualMachine(params);
                 vm2.loadProgram("/pr2.txt");
-                vm2.run();
+                while (true) {
+                    processor = vm2.processCommand(vm2.getCommand());
+                    if(!(Processor.processSIValue(processor, vm2.virtualMemory)))
+                        break;
+                }
+                refreshMemoryTable();
                 vm2.freeMemory();
-
+                break;
             default:
                 return;
         }

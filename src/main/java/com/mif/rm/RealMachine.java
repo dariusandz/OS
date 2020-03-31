@@ -229,7 +229,7 @@ public class RealMachine {
     }
 
     @FXML
-    private AnchorPane commandContainer;
+    private VBox commandContainer;
 
     @FXML
     private TableView commandTable;
@@ -253,6 +253,7 @@ public class RealMachine {
         });
 
         setNextCommand();
+        FXUtil.fitChildrenToContainer(commandContainer);
         FXUtil.resizeEquallyTableColumns(commandTable);
     }
 
@@ -292,14 +293,15 @@ public class RealMachine {
             registerTable.getItems().add(registerTableRow);
         }
 
-        FXUtil.resizeEquallyTableColumns(memoryTable);
+        FXUtil.fitChildrenToContainer(registersContainer);
+        FXUtil.resizeEquallyTableColumns(registerTable);
     }
 
     @FXML
     private TableView memoryTable;
 
     @FXML
-    private AnchorPane memoryTablePane;
+    private VBox memoryTablePane;
 
     private List<MemoryTableRow> memoryTableRows = new ArrayList<>();
 
@@ -327,6 +329,7 @@ public class RealMachine {
             memoryTable.getColumns().add(column);
         }
 
+        FXUtil.fitChildrenToContainer(memoryTablePane);
         FXUtil.resizeEquallyTableColumns(memoryTable);
     }
 

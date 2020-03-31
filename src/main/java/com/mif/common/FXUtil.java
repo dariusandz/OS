@@ -58,8 +58,8 @@ public class FXUtil {
         double maxWidth = container.getPrefWidth();
         double maxHeight = container.getPrefHeight();
         children.forEach(child -> {
-            if (child.getClass().equals(HBox.class)) {
-                ((HBox) child).setMinSize(maxWidth, maxHeight / children.size());
+            if (child.getClass().equals(TableView.class)) {
+                ((TableView) child).setMinSize(maxWidth, maxHeight / children.size());
             }
         });
     }

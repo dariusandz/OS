@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import static java.lang.Integer.parseInt;
-
 public class Processor {
 
     private static Processor processor = getInstance();
@@ -84,16 +82,18 @@ public class Processor {
                 else {
                     switch (processor.BX.getValue()) {
                         case 0:
-                            devices.get(processor.AX.getValue()-1).onOffSwitch(processor.BX.getValue());
-                            break;
                         case 1:
-                            devices.get(processor.AX.getValue()-1).onOffSwitch(processor.BX.getValue());
+                            devices.get(processor.AX.getValue() - 1).onOffSwitch(
+                                    DeviceState.parseState(processor.BX.getValue())
+                            );
                             break;
                         case 2:
-                            devices.get(processor.AX.getValue()-1).onOffSwitch();
+                            devices.get(processor.AX.getValue() - 1).onOffSwitch();
                             break;
                         case 3:
-                            processor.BX.setValue(devices.get(processor.AX.getValue()-1).getPower());
+                            processor.BX.setValue(
+                                    devices.get(processor.AX.getValue() - 1).getState().toInt()
+                            );
                             break;
                         default:
                             System.out.println("Unknown device command");
@@ -107,7 +107,7 @@ public class Processor {
                     return false;
                 }
                 else {
-                    if (devices.get(processor.AX.getValue() - 1).getPower() == 1)
+                    if (devices.get(processor.AX.getValue() - 1).getState() == DeviceState.ON)
                         devices.get(processor.AX.getValue() - 1).setValue(processor.BX.getValue());
                     else {
                         System.out.println("Turn on the device");
@@ -121,7 +121,7 @@ public class Processor {
                     return false;
                 }
                 else {
-                    if (devices.get(processor.AX.getValue() - 1).getPower() == 1){
+                    if (devices.get(processor.AX.getValue() - 1).getState() == DeviceState.ON){
                         int deviceValue = devices.get(processor.AX.getValue() - 1).getValue();
                         if(deviceValue == 10)
                             processor.BX.setValue(new byte[] {0, 0, '1', '0'} );
@@ -140,8 +140,10 @@ public class Processor {
                     return false;
                 }
                 else {
-                    if (devices.get(processor.AX.getValue() - 1).getPower() == 1)
-                        processor.BX.setValue(devices.get(processor.AX.getValue() - 1).getType());
+                    if (devices.get(processor.AX.getValue() - 1).getState() == DeviceState.ON)
+                        processor.BX.setValue(
+                                devices.get(processor.AX.getValue() - 1).getIntType()
+                        );
                     else {
                         System.out.println("Turn on the device");
                         return false;
@@ -150,9 +152,9 @@ public class Processor {
                 break;
             case 10: // MONT
                 if (processor.AX.getValue() == 1)
-                    devices.add(new Device(1));
+                    devices.add(new Device(DeviceType.BATTERY));
                 else if (processor.AX.getValue() == 2)
-                    devices.add(new Device(2));
+                    devices.add(new Device(DeviceType.LED));
                 else {
                     System.out.println("Bad device type");
                     return false;

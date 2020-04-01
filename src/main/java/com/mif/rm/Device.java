@@ -1,18 +1,33 @@
 package com.mif.rm;
 
-public class Device {
-    private final int type;
-    private int value;
-    private int power;
+import com.mif.common.IdGenerator;
 
-    public Device(int type) {
+public class Device {
+
+    private IdGenerator generator = new IdGenerator();
+
+    private Long id;
+    private final DeviceType type;
+    private int value;
+    private DeviceState state;
+
+    public Device(DeviceType type) {
+        this.id = generator.getId();
         this.type = type;
         this.value = 10;
-        this.power = 0;
+        this.state = DeviceState.OFF;
     }
 
-    public int getType() {
+    public int getIntType() {
+        return type == DeviceType.BATTERY ? 1 : 2;
+    }
+
+    public DeviceType getType() {
         return type;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public int getValue() {
@@ -23,17 +38,17 @@ public class Device {
         this.value = value;
     }
 
-    public void onOffSwitch(int power) {
-        this.power = power;
+    public void onOffSwitch(DeviceState state) {
+        this.state = state;
     }
 
     public void onOffSwitch() {
-        if(this.power == 0)
-            this.power = 1;
-        else this.power = 0;
+        if (this.state == DeviceState.OFF)
+            this.state = DeviceState.ON;
+        else this.state = DeviceState.OFF;
     }
 
-    public int getPower() {
-        return this.power;
+    public DeviceState getState() {
+        return this.state;
     }
 }

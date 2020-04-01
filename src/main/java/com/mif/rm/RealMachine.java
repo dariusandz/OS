@@ -1,6 +1,7 @@
 package com.mif.rm;
 
 import com.mif.FXModel.CommandTableRow;
+import com.mif.FXModel.DeviceTableRow;
 import com.mif.FXModel.MemoryTableRow;
 import com.mif.FXModel.PagingTableRow;
 import com.mif.FXModel.RegisterTableRow;
@@ -86,7 +87,7 @@ public class RealMachine {
     public void step() {
         if (currentVm != null) {
             currentVm = getRunningVmById(idOfRunningMachine);
-            currentVm.processCommand();
+            String command = currentVm.processCommand();
 
             if(!processInterrupts())
                 cleanupVm(currentVm);
@@ -95,6 +96,9 @@ public class RealMachine {
         }
     }
 
+    // TODO tai cia gal grazint is procesinimo pagal kokia komanda gavo ta SI ar PI valuesa,
+    //  ir pagal tai butu galima SCAN PRNT ir pns igyvendint?
+    //  tarkim SCAN tai juk is UI klaviatura ivesim, o PRNT ne i konsole printinsim?
     private boolean processInterrupts() {
         processor.processTIValue();
         processor.processPIValue();
@@ -171,6 +175,7 @@ public class RealMachine {
         refreshMemoryTable();
         refreshRegisters();
         refreshVirtualMachineList();
+        refreshDeviceTable();
         setNextCommand();
     }
 
@@ -211,6 +216,41 @@ public class RealMachine {
                 vmChoiceBox.getItems().add("VM " + vm.getId().toString());
             });
         }
+    }
+
+    List<DeviceTableRow> deviceTableRows = new ArrayList<>();
+
+    // NOT SURE GOING SLEEP
+    private void refreshDeviceTable() {
+        processor.devices.forEach(device -> {
+            if (!deviceTableRows.stream().anyMatch(row -> row.getId() == device.getId())) {
+                DeviceTableRow deviceTableRow = new DeviceTableRow(device);
+                deviceTableRows.add(deviceTableRow);
+                deviceTable.getItems().add(deviceTableRow);
+            }
+        });
+    }
+
+    @FXML
+    private HBox deviceTableContainer;
+
+    @FXML
+    private TableView deviceTable;
+
+    private void renderDeviceTable() {
+        TableColumn<DeviceTableRow, String> deviceTypeCol = new TableColumn<>("Device");
+        deviceTypeCol.setCellValueFactory(new PropertyValueFactory<>("Type"));
+
+        TableColumn<DeviceTableRow, Integer> deviceValueCol = new TableColumn<>("Value");
+        deviceValueCol.setCellValueFactory(new PropertyValueFactory<>("Value"));
+
+        TableColumn<DeviceTableRow, String> deviceStateCol = new TableColumn<>("State");
+        deviceStateCol.setCellValueFactory(new PropertyValueFactory<>("State"));
+
+        deviceTable.getColumns().addAll(deviceTypeCol, deviceValueCol, deviceStateCol);
+
+        FXUtil.fitChildrenToContainer(deviceTableContainer);
+        FXUtil.resizeEquallyTableColumns(deviceTable);
     }
 
     @FXML
@@ -356,6 +396,7 @@ public class RealMachine {
     private void initialize() {
         renderRegisters();
         renderRealMemory();
+        renderDeviceTable();
     }
 
     @FXML

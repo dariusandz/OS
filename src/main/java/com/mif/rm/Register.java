@@ -1,5 +1,7 @@
 package com.mif.rm;
 
+import com.mif.common.ByteUtil;
+
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -40,5 +42,9 @@ public class Register {
     public void incrementValue() {
         int value = this.getValue();
         this.setValue(++value);
+    }
+
+    public String getHexValue() {
+        return ByteUtil.bytesToHex(value);
     }
 }

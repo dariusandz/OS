@@ -13,11 +13,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
@@ -85,21 +81,31 @@ public class RealMachine {
             currentVm = getRunningVmById(idOfRunningMachine);
 
             currentVm.processCommand();
-            processor.processTIValue();
-            if (!processor.processSIValue(currentVm.virtualMemory)) {
-                // TODO clean up virtual machine from real machine?
-                currentVm.freeMemory();
-                virtualMachines.remove(currentVm);
 
-                // TODO temporary, kol gali veikti tik viena VM
-                currentVm = null;
+            if(!test()){
+                    // TODO clean up virtual machine from real machine?
+                    currentVm.freeMemory();
+                    virtualMachines.remove(currentVm);
+                    // TODO temporary, kol gali veikti tik viena VM
+                    currentVm = null;
 
-                addToOutput("Virtuali masina su id [" + idOfRunningMachine + "] baige darba.");
+                    addToOutput("Virtuali masina su id [" + idOfRunningMachine + "] baige darba.");
+                }
+
             }
 
             updateUI();
         }
+
+    private boolean test() {
+        processor.processTIValue();
+        processor.processPIValue();
+        if (!processor.processSIValue(currentVm.virtualMemory))
+            return false;
+        else
+            return true;
     }
+
 
     private void run(String runCommand) {
         initializeVirtualMachine(runCommand);
@@ -182,9 +188,9 @@ public class RealMachine {
                         .filter(r -> r.getName().equals(reg.field.getName()))
                         .findFirst();
 
-            if (row.isPresent() && row.get().getValue() != reg.register.getValue()) {
+            if (row.isPresent() && row.get().getValue() != reg.register.getHexValue()) {
                 int i = registerTableRows.indexOf(row.get());
-                row.get().setValue(reg.register.getValue());
+                row.get().setValue(reg.register.getHexValue());
                 registerTableRows.set(i, row.get());
             }
         });
@@ -294,7 +300,7 @@ public class RealMachine {
         for (RegisterInstance readonlyRegister : readonlyRegisters) {
             RegisterTableRow registerTableRow = new RegisterTableRow(
                     readonlyRegister.field.getName(),
-                    readonlyRegister.register.getValue()
+                    readonlyRegister.register.getHexValue()
             );
 
             registerTableRows.add(registerTableRow);
@@ -315,9 +321,11 @@ public class RealMachine {
     private List<MemoryTableRow> memoryTableRows = new ArrayList<>();
 
     private void renderMemory() {
-//        TableColumn<TablePage, TablePage> indexCol = new TableColumn<>("Page number");
-//        indexCol.setCellValueFactory(new PropertyValueFactory<>("pageNumber"));
-//        memoryTable.getColumns().add(indexCol);
+/*
+        TableColumn<TablePage, TablePage> indexCol = new TableColumn<>("Page number");
+        indexCol.setCellValueFactory(new PropertyValueFactory<>("pageNumber"));
+        memoryTable.getColumns().add(indexCol);
+*/
 
         memoryTable.setPrefWidth(memoryTablePane.getPrefWidth());
 
@@ -328,7 +336,6 @@ public class RealMachine {
             }
             memoryTableRows.add(memoryTableRow);
             memoryTable.getItems().add(memoryTableRow);
-
         }
         for (int col = 0; col < Memory.pageSize; col++) {
             TableColumn<MemoryTableRow, String> column = new TableColumn<>(String.valueOf(col));
@@ -337,25 +344,8 @@ public class RealMachine {
             column.setEditable(false);
             memoryTable.getColumns().add(column);
         }
-        /*for (int col = 0; col < Memory.pageSize; col++) {
-            TableColumn<MemoryTableRow, String> column = new TableColumn<>(String.valueOf(col));
-            column.setCellValueFactory(FXUtil.createArrayValueFactory(MemoryTableRow::getValues, col));
-
-            MemoryTableRow memoryTableRow = new MemoryTableRow(col);
-            for (int row = 0; row < Memory.defaultMemorySize / (Memory.pageSize * Memory.wordLen); row++) {
-                memoryTableRow.add(row, memory.getWord(col, row));
-            }
-
-            memoryTableRows.add(memoryTableRow);
-            memoryTable.getItems().add(memoryTableRow);
-
-            column.setSortable(false);
-            column.setEditable(false);
-            memoryTable.getColumns().add(column);
-        }*/
 
         FXUtil.fitChildrenToContainer(memoryTablePane);
-        //FXUtil.resizeEquallyTableColumns(memoryTable);
         FXUtil.autoResizeColumnsOnTextSize(memoryTable);
     }
 

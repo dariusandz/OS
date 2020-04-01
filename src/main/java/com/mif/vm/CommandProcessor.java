@@ -126,6 +126,9 @@ public class CommandProcessor {
         else if (getCommandByteValue(command, 4) == TYPE.getValue()) {
             TYPE();
         }
+        else {
+            Processor.PI.setValue(2);
+        }
 
         processor.IC.incrementValue();
         if(getCommandByteValue(command, 4) == PRNT.getValue() ||

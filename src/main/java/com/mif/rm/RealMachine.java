@@ -105,6 +105,7 @@ public class RealMachine {
         initializeVirtualMachine(runCommand);
         renderCommandTable();
         refreshMemoryTable();
+        refreshRegisters();
     }
 
     private VirtualMachine getRunningVmById(Long id) {

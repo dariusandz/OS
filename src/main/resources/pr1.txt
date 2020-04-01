@@ -1,3 +1,6 @@
+@dataseg
+aaaaaaaa,wwwww
+@codeseg
 LDN A 0000AAAA
 SVR A 00000504
 LDM B 00000504

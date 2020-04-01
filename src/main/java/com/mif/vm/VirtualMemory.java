@@ -33,7 +33,7 @@ public class VirtualMemory implements IMemory {
 
     // Gets a word(command) to execute from CODESEG
     public byte[] getCodeWord(int nthWord) {
-        return pagingTable.getWordFromMemory(CODESEG_START_PAGE, nthWord);
+        return pagingTable.getWordFromMemory(CODESEG_START_PAGE + nthWord/16, nthWord%16);
     }
 
     // Gets a word from memory
@@ -85,6 +85,7 @@ public class VirtualMemory implements IMemory {
             inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
             String programStr = IOUtils.toString(inputStream, "UTF-8");
             programStr = programStr.replaceAll("\n", "").replace(" ", "").replace("\r","");
+            programStr = programStr.split("@codeseg", 2)[1];
             putIntoMemory(replaceHex(programStr));
         } catch (IOException e) {
             e.printStackTrace();
@@ -93,6 +94,7 @@ public class VirtualMemory implements IMemory {
 
     // Puts loaded program from file to CODESEG
     private void putIntoMemory(byte[] byteCode) {
+
         for (int i = 0; i < byteCode.length / wordSize; i++) {
             byte[] word = Arrays.copyOfRange(byteCode, i * wordSize, i * wordSize + wordSize);
             putWordToMemory(CODESEG_START_PAGE + i/16, i%16, word);
@@ -123,6 +125,18 @@ public class VirtualMemory implements IMemory {
             byte[] bytes = param.getBytes(StandardCharsets.UTF_8);
             putWordToMemory(PARAMSEG_START_PAGE, index, param.getBytes(StandardCharsets.UTF_8));
         }
+    }
+
+    public void putDataSegIntoMemory(String dataSeg) {
+        byte[] bytes = dataSeg.getBytes();
+        if(bytes.length > pageSize*wordSize){
+            byte[] bytes1 = Arrays.copyOfRange(bytes,0,pageSize * wordSize - 1);
+            putBytesToMemory(DATASEG_START_PAGE, 0, bytes1, bytes1.length);
+            bytes1 = Arrays.copyOfRange(bytes, pageSize * wordSize + 1, bytes.length);
+            putBytesToMemory(DATASEG_START_PAGE + 1, 0, bytes1, bytes1.length);
+        }
+        else
+            putBytesToMemory(DATASEG_START_PAGE, 0, bytes, bytes.length);
     }
 
     public void freeMemory() {

@@ -1,6 +1,7 @@
 package com.mif.vm;
 
 import com.mif.common.ByteUtil;
+import com.mif.rm.Processor;
 import com.mif.rm.Register;
 import com.mif.rm.Memory;
 
@@ -19,7 +20,7 @@ public class PagingTable {
     public Register PTR = new Register();
 
     public PagingTable() {
-        PTR.setValue(memoryInstance.requestPage());
+        Processor.PTR.setValue(memoryInstance.requestPage());
     }
 
     // Requests unused memory pages from real memory
@@ -35,30 +36,30 @@ public class PagingTable {
     public void setPaging() {
         for (int wordNum = 0; wordNum < pageMap.size(); wordNum++) {
             byte[] realPage = ByteUtil.intToBytes(pageMap.get(wordNum));
-            memoryInstance.putWord(PTR.getValue(), wordNum, realPage);
+            memoryInstance.putWord(Processor.PTR.getValue(), wordNum, realPage);
         }
     }
 
     public byte[] getWordFromMemory(int page, int word) {
-        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(PTR.getValue(), page));
+        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(Processor.PTR.getValue(), page));
         return memoryInstance.getWord(pageInMemory, word);
     }
 
     public byte[] getBytesFromMemory(int page, int word, int byteCount) {
-        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(PTR.getValue(), page));
+        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(Processor.PTR.getValue(), page));
         return memoryInstance.getBytes(pageInMemory, word, byteCount);
     }
 
     public void putWordToMemory(int pageNum, int wordNum, byte[] word) {
-        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(PTR.getValue(), pageNum));
+        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(Processor.PTR.getValue(), pageNum));
         memoryInstance.putWord(pageInMemory, wordNum, word);
     }
 
     public void putBytesToMemory(int pageNum, int wordNum, byte[] words, int byteCount) {
-        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(PTR.getValue(), pageNum));
+        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(Processor.PTR.getValue(), pageNum));
         memoryInstance.putBytes(pageInMemory, wordNum, words, byteCount);    }
 
     public void freeMemory() {
-        memoryInstance.freeVMMemory(pageMap, PTR.getValue());
+        memoryInstance.freeVMMemory(pageMap, Processor.PTR.getValue());
     }
 }

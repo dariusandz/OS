@@ -1,5 +1,5 @@
 @dataseg
-aaaaaaaa,wwwww
+aaaaaaaa,wwwww,cdcdcdcda
 @codeseg
 LDN A 0000AAAA
 SVR A 00000504

@@ -2,6 +2,7 @@ package com.mif.rm;
 
 import com.mif.FXModel.CommandTableRow;
 import com.mif.FXModel.MemoryTableRow;
+import com.mif.FXModel.PagingTableRow;
 import com.mif.FXModel.RegisterTableRow;
 import com.mif.Main;
 import com.mif.common.ByteUtil;
@@ -13,9 +14,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -79,25 +86,16 @@ public class RealMachine {
     public void step() {
         if (currentVm != null) {
             currentVm = getRunningVmById(idOfRunningMachine);
-
             currentVm.processCommand();
 
-            if(!test()){
-                    // TODO clean up virtual machine from real machine?
-                    currentVm.freeMemory();
-                    virtualMachines.remove(currentVm);
-                    // TODO temporary, kol gali veikti tik viena VM
-                    currentVm = null;
-
-                    addToOutput("Virtuali masina su id [" + idOfRunningMachine + "] baige darba.");
-                }
-
-            }
+            if(!processInterrupts())
+                cleanupVm(currentVm);
 
             updateUI();
         }
+    }
 
-    private boolean test() {
+    private boolean processInterrupts() {
         processor.processTIValue();
         processor.processPIValue();
         if (!processor.processSIValue(currentVm.virtualMemory))
@@ -106,6 +104,22 @@ public class RealMachine {
             return true;
     }
 
+    private void cleanupVm(VirtualMachine vm) {
+        vm.freeMemory();
+        vmCommands.remove(vm.getId());
+        virtualMachines.remove(vm);
+        currentVm = null;
+        addToOutput("Virtuali masina su id [" + idOfRunningMachine + "] baige darba.");
+        idOfRunningMachine = Long.valueOf(-1);
+        processor.resetRegisterValues();
+        cleanupUI();
+    }
+
+    private void cleanupUI() {
+        commandTable.getItems().clear();
+        commandTable.getColumns().clear();
+        vmChoiceBox.getItems().clear();
+    }
 
     private void run(String runCommand) {
         initializeVirtualMachine(runCommand);
@@ -140,6 +154,7 @@ public class RealMachine {
         this.virtualMachines.add(virtualMachine);
         // TODO temporary, kol gali veikti tik viena VM
         this.currentVm = virtualMachine;
+        this.refreshVirtualMachineList();
     }
 
     private List<String> getParams(String[] splitCommand) {
@@ -155,21 +170,11 @@ public class RealMachine {
     private void updateUI() {
         refreshMemoryTable();
         refreshRegisters();
+        refreshVirtualMachineList();
         setNextCommand();
     }
 
     private void refreshMemoryTable() {
-/*        for (int i = 0; i < memoryTableRows.size(); i++) {
-            MemoryTableRow memoryPage = memoryTableRows.get(i);
-            for (int j = 0; j < memoryPage.wordIntValues.length; j++) {
-                byte[] memoryWordBytes = memory.getWord(i, j);
-                int memoryWordInt = ByteUtil.byteToInt(memoryWordBytes);
-                if (memoryPage.getWord(j) != memoryWordInt) {
-                    memoryPage.setWord(j, memoryWordInt);
-                    memoryTableRows.set(i, memoryPage);
-                }
-            }
-        }*/
         for (int i = 0; i < memoryTableRows.size(); i++) {
             MemoryTableRow memoryTableRow = memoryTableRows.get(i);
             for (int j = 0; j < memoryTableRow.wordHexValues.length; j++) {
@@ -195,6 +200,130 @@ public class RealMachine {
             }
         });
         registerTable.refresh();
+    }
+
+    @FXML
+    private ChoiceBox vmChoiceBox;
+
+    private void refreshVirtualMachineList() {
+        if (vmChoiceBox.getItems().size() != virtualMachines.size()) {
+            virtualMachines.forEach(vm -> {
+                vmChoiceBox.getItems().add("VM " + vm.getId().toString());
+            });
+        }
+    }
+
+    @FXML
+    private Button vmBtn;
+
+    @FXML
+    private void renderVm() {
+        String vmChoice = (String) vmChoiceBox.getValue();
+        if (vmChoice == null) {
+            vmBtn.setStyle("-fx-background-color: red;");
+            return;
+        } else {
+            vmBtn.setStyle("");
+        }
+
+        Long vmId = Long.valueOf(vmChoice.split(" ")[1]);
+        VirtualMachine selectedVm = getRunningVmById(vmId);
+
+        VBox vmVBox = new VBox();
+        vmVBox.setPrefHeight(400);
+        vmVBox.setPrefWidth(800);
+
+        TableView pagingTable = getPagingTable(selectedVm);
+
+        HBox pagingTableHbox = new HBox(pagingTable);
+        pagingTableHbox.setHgrow(pagingTable, Priority.ALWAYS);
+        pagingTableHbox.setPrefWidth(vmVBox.getPrefWidth());
+        pagingTableHbox.setPrefHeight(55);
+        pagingTable.setPrefWidth(pagingTableHbox.getPrefWidth());
+        FXUtil.fitChildrenToContainer(pagingTableHbox);
+        FXUtil.resizeEquallyTableColumns(pagingTable);
+        pagingTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        HBox skirtukas = new HBox();
+        skirtukas.setPrefHeight(75);
+
+        TableView vmMemoryTable = getVmMemoryTable(selectedVm);
+
+        HBox vmMemoryTableHbox = new HBox(vmMemoryTable);
+        vmMemoryTableHbox.setHgrow(vmMemoryTable, Priority.ALWAYS);
+        vmMemoryTableHbox.setPrefWidth(vmVBox.getPrefWidth());
+        vmMemoryTable.setPrefWidth(vmMemoryTableHbox.getPrefWidth());
+        FXUtil.fitChildrenToContainer(vmMemoryTableHbox);
+        FXUtil.autoResizeColumnsOnTextSize(vmMemoryTable);
+
+        FXUtil.fitChildrenToContainer(vmVBox);
+
+        vmVBox.getChildren().addAll(pagingTableHbox, skirtukas, vmMemoryTableHbox);
+
+        Scene vmScene = new Scene(vmVBox);
+
+        Stage vmStage = new Stage();
+        vmStage.setTitle("Virtual machine [" + vmId + "]");
+        vmStage.setScene(vmScene);
+        vmStage.show();
+    }
+
+    private TableView getPagingTable(VirtualMachine vm) {
+        TableView tableView = new TableView();
+
+        String color;
+        for (int col = 0; col < Memory.pageSize; col++) {
+            TableColumn<PagingTableRow, Integer> column = new TableColumn<>(String.valueOf(col));
+            column.setCellValueFactory(FXUtil.createArrayValueFactory(PagingTableRow::getRmPages, col));
+            tableView.getColumns().add(column);
+//            column.setStyle("-fx-background-color: " + getSegmentColor(col));
+        }
+
+        PagingTableRow pagingTableRow = new PagingTableRow();
+        for (Map.Entry<Integer, Integer> entry : vm.virtualMemory.pagingTable.pageMap.entrySet()) {
+            pagingTableRow.add(entry.getKey(), entry.getValue());
+        }
+        tableView.getItems().add(pagingTableRow);
+
+        return tableView;
+    }
+
+    private TableView getVmMemoryTable(VirtualMachine vm) {
+        TableView tableView = new TableView();
+
+        TableColumn<MemoryTableRow, Integer> indexCol = new TableColumn<>("Page");
+        indexCol.setCellValueFactory(new PropertyValueFactory<>("pageNumber"));
+        indexCol.setEditable(false);
+        tableView.getColumns().add(indexCol);
+
+        String color;
+        for (Map.Entry<Integer, Integer> entry : vm.virtualMemory.pagingTable.pageMap.entrySet()) {
+            MemoryTableRow memoryTableRow = new MemoryTableRow(entry.getValue());
+
+            TableColumn<MemoryTableRow, String> column = new TableColumn<>(entry.getKey().toString());
+            column.setCellValueFactory(FXUtil.createArrayValueFactory(MemoryTableRow::getValues, entry.getKey()));
+            column.setSortable(false);
+            column.setEditable(false);
+            tableView.getColumns().add(column);
+
+            for (int row = 0; row < Memory.pageSize; row++) {
+                for (int col = 0; col < Memory.pageSize; col++) {
+                    memoryTableRow.add(col, memory.getWord(entry.getValue(), col));
+                }
+            }
+            tableView.getItems().add(memoryTableRow);
+        }
+
+        return tableView;
+    }
+
+    private String getSegmentColor(int index) {
+        if (index == 0)
+            return "blue;";
+        else if (index >= 1 && index <= 2)
+            return "green";
+        else
+            return "yellow";
     }
 
     // TODO kai komanda 8 baitu, IC painkrementina po 2, nors UI si komanda tik vienoje eiluteje - del to skipina
@@ -226,7 +355,7 @@ public class RealMachine {
     @FXML
     private void initialize() {
         renderRegisters();
-        renderMemory();
+        renderRealMemory();
     }
 
     @FXML
@@ -320,7 +449,7 @@ public class RealMachine {
 
     private List<MemoryTableRow> memoryTableRows = new ArrayList<>();
 
-    private void renderMemory() {
+    private void renderRealMemory() {
         TableColumn<MemoryTableRow, Integer> indexCol = new TableColumn<>("Page");
         indexCol.setCellValueFactory(new PropertyValueFactory<>("pageNumber"));
         memoryTable.getColumns().add(indexCol);

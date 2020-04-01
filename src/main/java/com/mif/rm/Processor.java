@@ -202,4 +202,8 @@ public class Processor {
                 break;
         }
     }
+
+    public void resetRegisterValues() {
+        initializeRegisters();
+    }
 }

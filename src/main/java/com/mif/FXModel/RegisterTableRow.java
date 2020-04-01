@@ -3,9 +3,9 @@ package com.mif.FXModel;
 public class RegisterTableRow {
 
     String name;
-    Integer value;
+    String value;
 
-    public RegisterTableRow(String name, Integer value) {
+    public RegisterTableRow(String name, String value) {
         this.name = name;
         this.value = value;
     }
@@ -18,11 +18,11 @@ public class RegisterTableRow {
         this.name = name;
     }
 
-    public Integer getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(Integer value) {
+    public void setValue(String value) {
         this.value = value;
     }
 }

@@ -49,30 +49,6 @@ public class Processor {
         ZF = new Register();
     }
 
-//    void run() {
-//        int outputText;
-////        Scanner scan = new Scanner(System.in);
-//        while (true) {
-//            System.out.println("Type in the number for which virtual machine to start");
-//            outputText = 1;//parseInt(scan.nextLine());
-//            switch (outputText) {
-//                case 1:
-//                    VirtualMachine vm = new VirtualMachine();
-//                    vm.loadProgram("/pr1.txt");
-//                    vm.run();
-//                    vm.freeMemory();
-//                    break;
-//                case 2:
-//                    VirtualMachine vm2 = new VirtualMachine();
-//                    vm2.loadProgram("/pr2.txt");
-//                    vm2.run();
-//                    vm2.freeMemory();
-//                    break;
-//                default:
-//
-//            }
-//        }
-//    }
 
     public boolean processSIValue(VirtualMemory virtualMemory) {
         switch (processor.SI.getValue()) { //TODO needs to be redone?
@@ -201,6 +177,29 @@ public class Processor {
         if(TI.getValue() == 0) {
             System.out.println("Timer is over");
             TI.setValue(20);
+        }
+    }
+
+    public void processPIValue() {
+        switch (Processor.PI.getValue()) {
+            case 0:
+                break;
+            case 1:
+                System.out.println("Wrong address");
+                Processor.PI.setValue(0);
+                break;
+            case 2:
+                System.out.println("Wrong operation code");
+                Processor.PI.setValue(0);
+                break;
+            case 3:
+                System.out.println("Wrong assignment");
+                Processor.PI.setValue(0);
+                break;
+            case 4:
+                System.out.println("Overflow");
+                Processor.PI.setValue(0);
+                break;
         }
     }
 }

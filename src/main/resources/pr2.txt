@@ -1,3 +1,5 @@
+@dataseg
+@codeseg
 LDN A 00000001
 MONT
 LDN B 00000002

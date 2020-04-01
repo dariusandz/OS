@@ -315,9 +315,9 @@ public class RealMachine {
     private List<MemoryTableRow> memoryTableRows = new ArrayList<>();
 
     private void renderMemory() {
-//        TableColumn<TablePage, TablePage> indexCol = new TableColumn<>("Page number");
-//        indexCol.setCellValueFactory(new PropertyValueFactory<>("pageNumber"));
-//        memoryTable.getColumns().add(indexCol);
+        TableColumn<MemoryTableRow, Integer> indexCol = new TableColumn<>("Page");
+        indexCol.setCellValueFactory(new PropertyValueFactory<>("pageNumber"));
+        memoryTable.getColumns().add(indexCol);
 
         memoryTable.setPrefWidth(memoryTablePane.getPrefWidth());
 
@@ -328,8 +328,8 @@ public class RealMachine {
             }
             memoryTableRows.add(memoryTableRow);
             memoryTable.getItems().add(memoryTableRow);
-
         }
+
         for (int col = 0; col < Memory.pageSize; col++) {
             TableColumn<MemoryTableRow, String> column = new TableColumn<>(String.valueOf(col));
             column.setCellValueFactory(FXUtil.createArrayValueFactory(MemoryTableRow::getValues, col));
@@ -337,22 +337,6 @@ public class RealMachine {
             column.setEditable(false);
             memoryTable.getColumns().add(column);
         }
-        /*for (int col = 0; col < Memory.pageSize; col++) {
-            TableColumn<MemoryTableRow, String> column = new TableColumn<>(String.valueOf(col));
-            column.setCellValueFactory(FXUtil.createArrayValueFactory(MemoryTableRow::getValues, col));
-
-            MemoryTableRow memoryTableRow = new MemoryTableRow(col);
-            for (int row = 0; row < Memory.defaultMemorySize / (Memory.pageSize * Memory.wordLen); row++) {
-                memoryTableRow.add(row, memory.getWord(col, row));
-            }
-
-            memoryTableRows.add(memoryTableRow);
-            memoryTable.getItems().add(memoryTableRow);
-
-            column.setSortable(false);
-            column.setEditable(false);
-            memoryTable.getColumns().add(column);
-        }*/
 
         FXUtil.fitChildrenToContainer(memoryTablePane);
         //FXUtil.resizeEquallyTableColumns(memoryTable);

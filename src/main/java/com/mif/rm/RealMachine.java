@@ -85,7 +85,7 @@ public class RealMachine {
             currentVm = getRunningVmById(idOfRunningMachine);
 
             currentVm.processCommand();
-
+            processor.processTIValue();
             if (!processor.processSIValue(currentVm.virtualMemory)) {
                 // TODO clean up virtual machine from real machine?
                 currentVm.freeMemory();

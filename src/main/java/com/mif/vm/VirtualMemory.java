@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.mif.common.ByteUtil;
+import com.mif.rm.Processor;
 import org.apache.commons.io.IOUtils;
 
 public class VirtualMemory implements IMemory {
@@ -28,6 +29,7 @@ public class VirtualMemory implements IMemory {
     public VirtualMemory(List<String> params) {
         pagingTable.requestPages(pages);
         pagingTable.setPaging();
+        Processor.TI.setValue(20);
         putParamsIntoMemory(params);
     }
 

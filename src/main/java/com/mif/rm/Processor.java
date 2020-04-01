@@ -196,4 +196,11 @@ public class Processor {
         processor.SI.setValue(0);
         return true;
     }
+
+    public void processTIValue() {
+        if(TI.getValue() == 0) {
+            System.out.println("Timer is over");
+            TI.setValue(20);
+        }
+    }
 }

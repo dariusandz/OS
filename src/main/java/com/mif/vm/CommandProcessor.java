@@ -128,6 +128,11 @@ public class CommandProcessor {
         }
 
         processor.IC.incrementValue();
+        if(getCommandByteValue(command, 4) == PRNT.getValue() ||
+                getCommandByteValue(command, 4) == SCAN.getValue())
+            processor.TI.setValue(processor.TI.getValue() - 3);
+        else
+            processor.TI.setValue(processor.TI.getValue() - 1);
         return command;
     }
 

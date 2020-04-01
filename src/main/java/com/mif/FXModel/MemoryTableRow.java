@@ -1,5 +1,6 @@
 package com.mif.FXModel;
 
+import com.mif.common.ByteUtil;
 import com.mif.rm.Memory;
 
 import java.nio.ByteBuffer;
@@ -7,11 +8,11 @@ import java.nio.ByteBuffer;
 public class MemoryTableRow {
 //TODO make hex values
     public Integer pageNumber;
-    public Integer[] wordIntValues = new Integer[Memory.pageSize];
+    public String[] wordHexValues = new String[Memory.pageSize];
 
     public MemoryTableRow(int pageNumber) { this.pageNumber = pageNumber; }
 
-    public Integer[] getValues() { return wordIntValues; }
+    public String[] getValues() { return wordHexValues; }
 
     public Integer getPageNumber() {
         return pageNumber;
@@ -21,23 +22,22 @@ public class MemoryTableRow {
         this.pageNumber = pageNumber;
     }
 
-    public Integer[] getIntValues() {
-        return wordIntValues;
+    public String[] getHexValues() {
+        return wordHexValues;
     }
 
-    public void setIntValues(Integer[] intValues) {
-        this.wordIntValues = intValues;
+    public void setHexValues(String[] hexValues) {
+        this.wordHexValues = hexValues;
     }
 
     public void add(int elIndex, byte[] word) {
-        wordIntValues[elIndex] = ByteBuffer.wrap(word).getInt();
+        wordHexValues[elIndex] = ByteUtil.bytesToHex(word);
     }
 
-    public Integer getWord(int wordIndex) {
-        return wordIntValues[wordIndex];
+    public String getWord(int wordIndex) {
+        return wordHexValues[wordIndex];
     }
 
-    public void setWord(int wordIndex, int value) {
-        wordIntValues[wordIndex] = value;
-    }
+    public void setWord(int wordIndex, String value) {
+        wordHexValues[wordIndex] = value; }
 }

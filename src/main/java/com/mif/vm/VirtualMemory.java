@@ -95,15 +95,15 @@ public class VirtualMemory implements IMemory {
     private void putIntoMemory(byte[] byteCode) {
         for (int i = 0; i < byteCode.length / wordSize; i++) {
             byte[] word = Arrays.copyOfRange(byteCode, i * wordSize, i * wordSize + wordSize);
-            putWordToMemory(CODESEG_START_PAGE, i, word);
-
+            putWordToMemory(CODESEG_START_PAGE + i/16, i%16, word);
+            /*
             // 8 byte commands, reads next byte for hex value
             String wordStr = new String(word);
             if (wordStr.contains("LD") || wordStr.contains("SVR") || wordStr.startsWith("J")) {
                 i++;
                 byte[] hexWord = Arrays.copyOfRange(byteCode, i * wordSize, i * wordSize + wordSize);
                 putWordToMemory(CODESEG_START_PAGE, i, hexWord);
-            }
+            }*/
         }
     }
 

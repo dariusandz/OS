@@ -104,6 +104,7 @@ public class RealMachine {
     private void run(String runCommand) {
         initializeVirtualMachine(runCommand);
         renderCommandTable();
+        refreshMemoryTable();
     }
 
     private VirtualMachine getRunningVmById(Long id) {
@@ -151,7 +152,7 @@ public class RealMachine {
     }
 
     private void refreshMemoryTable() {
-        for (int i = 0; i < memoryTableRows.size(); i++) {
+/*        for (int i = 0; i < memoryTableRows.size(); i++) {
             MemoryTableRow memoryPage = memoryTableRows.get(i);
             for (int j = 0; j < memoryPage.wordIntValues.length; j++) {
                 byte[] memoryWordBytes = memory.getWord(i, j);
@@ -161,6 +162,13 @@ public class RealMachine {
                     memoryTableRows.set(i, memoryPage);
                 }
             }
+        }*/
+        for (int i = 0; i < memoryTableRows.size(); i++) {
+            MemoryTableRow memoryTableRow = memoryTableRows.get(i);
+            for (int j = 0; j < memoryTableRow.wordHexValues.length; j++) {
+                memoryTableRow.setWord(j, ByteUtil.bytesToHex(memory.getWord(i,j)));
+            }
+            memoryTableRows.set(i,memoryTableRow);
         }
         memoryTable.refresh();
     }
@@ -312,8 +320,24 @@ public class RealMachine {
 
         memoryTable.setPrefWidth(memoryTablePane.getPrefWidth());
 
+        for (int row = 0; row < Memory.defaultMemorySize / (Memory.pageSize * Memory.wordLen); row++) {
+            MemoryTableRow memoryTableRow = new MemoryTableRow(row);
+            for (int column = 0; column < Memory.pageSize; column++) {
+                memoryTableRow.add(column, memory.getWord(row, column));
+            }
+            memoryTableRows.add(memoryTableRow);
+            memoryTable.getItems().add(memoryTableRow);
+
+        }
         for (int col = 0; col < Memory.pageSize; col++) {
-            TableColumn<MemoryTableRow, Integer> column = new TableColumn<>(String.valueOf(col));
+            TableColumn<MemoryTableRow, String> column = new TableColumn<>(String.valueOf(col));
+            column.setCellValueFactory(FXUtil.createArrayValueFactory(MemoryTableRow::getValues, col));
+            column.setSortable(false);
+            column.setEditable(false);
+            memoryTable.getColumns().add(column);
+        }
+        /*for (int col = 0; col < Memory.pageSize; col++) {
+            TableColumn<MemoryTableRow, String> column = new TableColumn<>(String.valueOf(col));
             column.setCellValueFactory(FXUtil.createArrayValueFactory(MemoryTableRow::getValues, col));
 
             MemoryTableRow memoryTableRow = new MemoryTableRow(col);
@@ -327,10 +351,11 @@ public class RealMachine {
             column.setSortable(false);
             column.setEditable(false);
             memoryTable.getColumns().add(column);
-        }
+        }*/
 
         FXUtil.fitChildrenToContainer(memoryTablePane);
-        FXUtil.resizeEquallyTableColumns(memoryTable);
+        //FXUtil.resizeEquallyTableColumns(memoryTable);
+        FXUtil.autoResizeColumnsOnTextSize(memoryTable);
     }
 
     @FXML

@@ -85,10 +85,10 @@ public class CommandProcessor {
             HALT(command);
         }
         else if (getCommandByteValue(command, 4) == STSB.getValue()) {
-            STSB(command);
+            STSB();
         }
         else if (getCommandByteValue(command, 4) == LDSB.getValue()) {
-            LDSB(command);
+            LDSB();
         }
         else if (getCommandByteValue(command, 4) == PUSH.getValue()) {
             PUSH();
@@ -398,12 +398,15 @@ public class CommandProcessor {
         );
     }
 
-    private void STSB(String command) {
-        // TODO
+    private void STSB() {
+        memory.putWordToMemory(15, Processor.DI.getByteValue()[3], Processor.AX.getByteValue());
+        Processor.DI.incrementValue();
     }
 
-    private void LDSB(String command) {
-        // TODO
+    private void LDSB() {
+        Processor.AX.setValue(memory.getWordFromMemory(VirtualMemory.DATASEG_START_PAGE, Processor.SI.getValue()));
+        Processor.SI.incrementValue();
+        // TODO kaip veikia SI, DI ??? kokia value default?
     }
 
     private void PUSH() {

@@ -99,9 +99,6 @@ public class RealMachine {
         }
     }
 
-    // TODO tai cia gal grazint is procesinimo pagal kokia komanda gavo ta SI ar PI valuesa,
-    //  ir pagal tai butu galima SCAN PRNT ir pns igyvendint?
-    //  tarkim SCAN tai juk is UI klaviatura ivesim, o PRNT ne i konsole printinsim?
     private boolean processInterrupts() {
         Pair<Integer, String> siValuePair = processor.processSIValue(currentVm.virtualMemory);
         if(siValuePair != null){

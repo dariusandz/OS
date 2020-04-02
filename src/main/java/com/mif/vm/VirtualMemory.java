@@ -81,17 +81,20 @@ public class VirtualMemory implements IMemory {
     }
 
     // Loads a program from file into string
-    public void loadProgram(String filePath) {
+    public boolean loadProgram(String filePath) {
         InputStream inputStream = null;
         try {
             inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
             String programStr = IOUtils.toString(inputStream, "UTF-8");
             programStr = programStr.replaceAll("\n", "").replace(" ", "").replace("\r","");
+            if(!programStr.contains("@codeseg") || !programStr.contains("@dataseg"))
+                return false;
             programStr = programStr.split("@codeseg", 2)[1];
             putIntoMemory(replaceHex(programStr));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return true;
     }
 
     // Puts loaded program from file to CODESEG

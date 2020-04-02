@@ -1,0 +1,9 @@
+@dataseg
+pr2 baige darba pr2.txt 22 2222
+@codeseg
+LDNA 00000104
+LOAD
+LDNA 00000100
+LDNB 0000000F
+PRNT
+HALT

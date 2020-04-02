@@ -1,10 +1,13 @@
 package com.mif.rm;
 
+import com.mif.common.ByteUtil;
 import com.mif.vm.VirtualMemory;
+import javafx.util.Pair;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import static java.lang.Integer.parseInt;
@@ -50,160 +53,145 @@ public class Processor {
     }
 
 
-    public boolean processSIValue(VirtualMemory virtualMemory) {
-        switch (processor.SI.getValue()) { //TODO needs to be redone?
+    public Pair<Integer, String> processSIValue(VirtualMemory virtualMemory) {
+        switch (SI.getValue()) {
             case 1:
-                int letterCount = processor.BX.getValue();
-                byte[] address = processor.AX.getByteValue();
-                String outputText = "1234567";
-                Scanner scan = new Scanner(System.in);
-                while (outputText.length() != letterCount) {
-                    System.out.println("Type in " + letterCount + " symbols");
-//                    outputText = scan.nextLine();
-                }
-                byte[] bytes = outputText.getBytes(StandardCharsets.UTF_8);
-                virtualMemory.putBytesToMemory(address[2], address[3], bytes, bytes.length);
-                break;
+                int letterCount = BX.getValue();
+                return new Pair<>(1, "Type in " + letterCount + " symbols");
             case 2:
-                byte[] bytes1 = virtualMemory.getBytesFromMemory(processor.AX.getByteValue()[2], processor.AX.getByteValue()[3], processor.BX.getValue());
-                System.out.println(new String(bytes1, StandardCharsets.UTF_8));
-                break;
+                byte[] bytes1 = virtualMemory.getBytesFromMemory(AX.getByteValue()[2], AX.getByteValue()[3], BX.getValue());
+                return new Pair<>(2, new String(bytes1, StandardCharsets.UTF_8));
             case 3:
-                return false;
+                return new Pair<>(3, null);
             case 4:
-                System.out.println(new String(virtualMemory.getWordFromMemory(processor.AX.getByteValue()[2], processor.AX.getByteValue()[3]), StandardCharsets.UTF_8));
-                break;
+                return new Pair<>(4, new String(virtualMemory.getWordFromMemory(AX.getByteValue()[2], AX.getByteValue()[3]), StandardCharsets.UTF_8));
             case 5:
-                // TODO LOAD command
-                break;
+                int fileNamePageNum = Processor.AX.getByteValue()[2];
+                int fileNameWordNum = Processor.AX.getByteValue()[3];
+                byte[] temp;
+                int byteCount = 1;
+                while (true){
+                    temp = virtualMemory.getBytesFromMemory(fileNamePageNum, fileNameWordNum, byteCount);
+                    if(temp[byteCount-1] == 0)
+                        break;
+                    byteCount++;
+                    if(fileNameWordNum + byteCount/4 == 16) {
+                        fileNameWordNum = 0;
+                        fileNamePageNum++;
+                    }
+                }
+                return new Pair<>(5, new String(temp));
             case 6:
-                if(devices.size() < processor.AX.getValue()) {
-                    System.out.println("Bad device index");
-                    return false;
+                if(devices.size() < AX.getValue()) {
+                    return new Pair<>(6, "Error: Bad device index");
                 }
                 else {
-                    switch (processor.BX.getValue()) {
+                    switch (BX.getValue()) {
                         case 0:
-                            devices.get(processor.AX.getValue()-1).onOffSwitch(processor.BX.getValue());
+                            devices.get(AX.getValue()-1).onOffSwitch(BX.getValue());
                             break;
                         case 1:
-                            devices.get(processor.AX.getValue()-1).onOffSwitch(processor.BX.getValue());
+                            devices.get(AX.getValue()-1).onOffSwitch(BX.getValue());
                             break;
                         case 2:
-                            devices.get(processor.AX.getValue()-1).onOffSwitch();
+                            devices.get(AX.getValue()-1).onOffSwitch();
                             break;
                         case 3:
-                            processor.BX.setValue(devices.get(processor.AX.getValue()-1).getPower());
+                            BX.setValue(devices.get(AX.getValue()-1).getPower());
                             break;
                         default:
-                            System.out.println("Unknown device command");
-                            return false;
+                            return new Pair<>(6, "Error: Unknown device command");
                     }
                 }
                 break;
             case 7:
-                if(devices.size() < processor.AX.getValue()) {
-                    System.out.println("Bad device index");
-                    return false;
+                if(devices.size() < AX.getValue()) {
+                    return new Pair<>(7, "Error: Bad device index");
                 }
                 else {
-                    if (devices.get(processor.AX.getValue() - 1).getPower() == 1)
-                        devices.get(processor.AX.getValue() - 1).setValue(processor.BX.getValue());
+                    if (devices.get(AX.getValue() - 1).getPower() == 1)
+                        devices.get(AX.getValue() - 1).setValue(BX.getValue());
                     else {
-                        System.out.println("Turn on the device");
-                        return false;
+                        return new Pair<>(7, "Error: Turn on the device");
                     }
                 }
                 break;
             case 8:
-                if(devices.size() < processor.AX.getValue()) {
-                    System.out.println("Bad device index");
-                    return false;
+                if(devices.size() < AX.getValue()) {
+                    return new Pair<>(8, "Error: Bad device index");
                 }
                 else {
-                    if (devices.get(processor.AX.getValue() - 1).getPower() == 1){
-                        int deviceValue = devices.get(processor.AX.getValue() - 1).getValue();
+                    if (devices.get(AX.getValue() - 1).getPower() == 1){
+                        int deviceValue = devices.get(AX.getValue() - 1).getValue();
                         if(deviceValue == 10)
-                            processor.BX.setValue(new byte[] {0, 0, '1', '0'} );
+                            BX.setValue(new byte[] {0, 0, '1', '0'} );
                         else
-                            processor.BX.setValue(new byte[] {0, 0, 0, (byte) (deviceValue+'0')});
+                            BX.setValue(new byte[] {0, 0, 0, (byte) (deviceValue+'0')});
                     }
                     else {
-                        System.out.println("Turn on the device");
-                        return false;
+                        return new Pair<>(8, "Error: Turn on the device");
                     }
                 }
                 break;
             case 9:
-                if(devices.size() < processor.AX.getValue()) {
-                    System.out.println("Bad device index");
-                    return false;
+                if(devices.size() < AX.getValue()) {
+                    return new Pair<>(9, "Error: Bad device index");
                 }
                 else {
-                    if (devices.get(processor.AX.getValue() - 1).getPower() == 1)
-                        processor.BX.setValue(devices.get(processor.AX.getValue() - 1).getType());
+                    if (devices.get(AX.getValue() - 1).getPower() == 1)
+                        BX.setValue(devices.get(AX.getValue() - 1).getType());
                     else {
-                        System.out.println("Turn on the device");
-                        return false;
+                        return new Pair<>(9, "Error: Turn on the device");
                     }
                 }
                 break;
             case 10: // MONT
-                if (processor.AX.getValue() == 1)
+                if (AX.getValue() == 1)
                     devices.add(new Device(1));
-                else if (processor.AX.getValue() == 2)
+                else if (AX.getValue() == 2)
                     devices.add(new Device(2));
                 else {
-                    System.out.println("Bad device type");
-                    return false;
+                    return new Pair<>(10, "Error: Bad device type");
                 }
                 break;
             case 11:
-                if(devices.size() < processor.AX.getValue()) {
-                    System.out.println("Bad device index");
-                    return false;
+                if(devices.size() < AX.getValue()) {
+                    return new Pair<>(10, "Error: Bad device index");
                 }
-                else devices.remove(processor.AX.getValue() - 1);
+                else devices.remove(AX.getValue() - 1);
                 break;
             default:
-                processor.SI.setValue(0);
-                return true;
+                SI.setValue(0);
+                return null;
         }
-        processor.SI.setValue(0);
-        return true;
+        SI.setValue(0);
+        return null;
     }
 
-    public void processTIValue() {
-        if(TI.getValue() == 0) {
-            System.out.println("Timer is over");
-            TI.setValue(20);
+    String processTIValue() {
+        if(TI.getValue() <= 0) {
+            return "Error: Timer is over";
         }
+        return null;
     }
 
-    public void processPIValue() {
+    String processPIValue() {
         switch (Processor.PI.getValue()) {
             case 0:
-                break;
+                return null;
             case 1:
-                System.out.println("Wrong address");
-                Processor.PI.setValue(0);
-                break;
+                return "Error: Wrong address";
             case 2:
-                System.out.println("Wrong operation code");
-                Processor.PI.setValue(0);
-                break;
+                return "Error: Wrong operation code";
             case 3:
-                System.out.println("Wrong assignment");
-                Processor.PI.setValue(0);
-                break;
+                return "Error: Wrong assignment";
             case 4:
-                System.out.println("Overflow");
-                Processor.PI.setValue(0);
-                break;
+                return "Error: Overflow";
         }
+        return null;
     }
 
-    public void resetRegisterValues() {
+    void resetRegisterValues() {
         initializeRegisters();
     }
 }

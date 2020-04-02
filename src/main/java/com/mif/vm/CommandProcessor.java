@@ -128,14 +128,15 @@ public class CommandProcessor {
         }
         else {
             Processor.PI.setValue(2);
+            return "";
         }
 
-        processor.IC.incrementValue();
+        Processor.IC.incrementValue();
         if(getCommandByteValue(command, 4) == PRNT.getValue() ||
                 getCommandByteValue(command, 4) == SCAN.getValue())
-            processor.TI.setValue(processor.TI.getValue() - 3);
+            Processor.TI.setValue(Processor.TI.getValue() - 3);
         else
-            processor.TI.setValue(processor.TI.getValue() - 1);
+            Processor.TI.setValue(Processor.TI.getValue() - 1);
         return command;
     }
 
@@ -406,13 +407,14 @@ public class CommandProcessor {
     }
 
     private void PUSH() {
-        memory.putWordToMemory(processor.SP.getValue()/16,processor.SP.getValue()%16, processor.AX.getByteValue());
-        processor.SP.incrementValue(4);
+        memory.putWordToMemory(Processor.SP.getByteValue()[2], Processor.SP.getByteValue()[3], Processor.AX.getByteValue());
+        Processor.SP.incrementValue(- 1);
     }
 
     private void POPP() {
-        processor.AX.setValue(memory.getWordFromMemory(processor.SP.getValue()/16,processor.SP.getValue()%16));
-        processor.SP.incrementValue(-4);
+        Processor.SP.incrementValue();
+        Processor.AX.setValue(memory.getWordFromMemory(Processor.SP.getByteValue()[2], Processor.SP.getByteValue()[3]));
+        memory.putWordToMemory(Processor.SP.getByteValue()[2], Processor.SP.getByteValue()[3], new byte[] {0,0,0,0});
     }
 
     private void PRNT() {

@@ -17,6 +17,6 @@ public class FileReader {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return programString.replaceAll("\n", "").replace(" ", "").replace("\r","");
+        return programString.replaceAll("\n", "").replace("\r","");
     }
 }

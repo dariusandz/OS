@@ -9,6 +9,6 @@ public interface IMemory {
     void putValueToMemory(int page, int word, int value);
     void putWordToMemory(int pageNum, int wordNum, byte[] word);
 
-    void loadProgram(String filename);
+    boolean loadProgram(String filename);
     void putBytesToMemory(int pageNum, int wordNum, byte[] words, int byteCount);
 }

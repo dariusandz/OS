@@ -21,6 +21,7 @@ public class PagingTable {
 
     public PagingTable() {
         Processor.PTR.setValue(memoryInstance.requestPage());
+        Processor.SP.setValue(new byte[]{0,0,2,15});
     }
 
     // Requests unused memory pages from real memory

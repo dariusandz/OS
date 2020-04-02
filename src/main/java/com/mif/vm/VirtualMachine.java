@@ -41,10 +41,11 @@ public class VirtualMachine {
 
     public List<String> loadProgram() {
         String program = reader.loadProgramAsString(this.programFileName);
-        virtualProcessor.loadInstructionsFromFile(programFileName);
+        if(!virtualProcessor.loadInstructionsFromFile(programFileName))
+            return null;
         String[] programArrays = program.split("@dataseg",2)[1].split("@codeseg",3);
         putDataSeg(programArrays[0]);
-        return getCommands(programArrays[1]);
+        return getCommands(programArrays[1].replace(" ", ""));
     }
 
     public void putDataSeg(String dataSeg) {

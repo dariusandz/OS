@@ -25,9 +25,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +39,8 @@ import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 public class RealMachine {
-
+    // TODO reikia padaryt kad butu GUI galima pakeisti registru reiksmes ir atminti :(
+    // TODO Leistų užkrauti kitas vartotojų programas ir valdymas būtų atiduodamas vėliausiai užkrautajai (jei laisvos atminties nepakanka apie tai pranešama)...... cia :(((((
     private Processor processor;
     private Memory memory;
 
@@ -88,7 +91,7 @@ public class RealMachine {
             currentVm = getRunningVmById(idOfRunningMachine);
             currentVm.processCommand();
 
-            if(!processInterrupts())
+            if (!processInterrupts())
                 cleanupVm(currentVm);
 
             updateUI();
@@ -96,12 +99,35 @@ public class RealMachine {
     }
 
     private boolean processInterrupts() {
-        processor.processTIValue();
-        processor.processPIValue();
-        if (!processor.processSIValue(currentVm.virtualMemory))
+        Pair<Integer, String> siValuePair = processor.processSIValue(currentVm.virtualMemory);
+        if(siValuePair != null){
+            if(siValuePair.getKey() == 3) {
+                return false;
+            }
+            if(siValuePair.getKey() == 5){
+                run(siValuePair.getValue());
+                processor.SI.setValue(0);
+            }
+            if(siValuePair.getKey() == 1) {
+                addToOutput(siValuePair.getValue());
+            }
+            if(siValuePair.getKey() ==  2 || siValuePair.getKey() == 4){
+                addToOutput(siValuePair.getValue());
+            }
+            if(siValuePair.getValue().contains("Error")) {
+                addToOutput(siValuePair.getValue());
+                return false;
+            }
+        }
+        if(processor.processTIValue() != null) {
+            addToOutput(processor.processTIValue());
             return false;
-        else
-            return true;
+        }
+        if(processor.processPIValue() != null) {
+            addToOutput(processor.processPIValue());
+            return false;
+        }
+        return true;
     }
 
     private void cleanupVm(VirtualMachine vm) {
@@ -109,9 +135,13 @@ public class RealMachine {
         vmCommands.remove(vm.getId());
         virtualMachines.remove(vm);
         currentVm = null;
-        addToOutput("Virtuali masina su id [" + idOfRunningMachine + "] baige darba.");
+        appendToOutput("Virtuali masina su id [" + idOfRunningMachine + "] baige darba.");
         idOfRunningMachine = Long.valueOf(-1);
         processor.resetRegisterValues();
+        if(virtualMachines.size() > 0) {
+            this.currentVm = virtualMachines.get(0);
+            this.idOfRunningMachine = virtualMachines.get(0).getId();
+        }
         cleanupUI();
     }
 
@@ -122,7 +152,8 @@ public class RealMachine {
     }
 
     private void run(String runCommand) {
-        initializeVirtualMachine(runCommand);
+        if(!initializeVirtualMachine(runCommand))
+            return;
         renderCommandTable();
         refreshMemoryTable();
         refreshRegisters();
@@ -140,7 +171,7 @@ public class RealMachine {
         return virtualMachines.get(optIndex.getAsInt());
     }
 
-    private void initializeVirtualMachine(String command) {
+    private boolean initializeVirtualMachine(String command) {
         String[] splitCommand = command.split(" ");
         List<String> params = getParams(splitCommand);
         String programFileName = splitCommand[0];
@@ -148,13 +179,20 @@ public class RealMachine {
         VirtualMachine virtualMachine = new VirtualMachine(programFileName, params);
         Long id = virtualMachine.getId();
         List<String> virtualMachinesCommands = virtualMachine.loadProgram();
-
+        if(virtualMachinesCommands == null){
+            addToOutput("Invalid file");
+            cleanupVm(virtualMachine);
+            return false;
+        }
         this.vmCommands.put(id, virtualMachinesCommands);
-        this.idOfRunningMachine = virtualMachine.getId();
         this.virtualMachines.add(virtualMachine);
         // TODO temporary, kol gali veikti tik viena VM
-        this.currentVm = virtualMachine;
+        if(this.currentVm == null) {
+            this.idOfRunningMachine = virtualMachine.getId();
+            this.currentVm = virtualMachine;
+        }
         this.refreshVirtualMachineList();
+        return true;
     }
 
     private List<String> getParams(String[] splitCommand) {
@@ -172,6 +210,13 @@ public class RealMachine {
         refreshRegisters();
         refreshVirtualMachineList();
         setNextCommand();
+        refreshVirtualMachineMemoryTable();
+    }
+
+    private void refreshVirtualMachineMemoryTable() {
+        //TODO butu gerai paupdatint cia VM memory.
+        // jei per nauja atsidarai langa tai pasupdateina, bet butu gerai ir kiekvieno stepo metu suupdatintu
+        // bet ne priority (aktualu kai steka ziuri
     }
 
     private void refreshMemoryTable() {
@@ -326,6 +371,7 @@ public class RealMachine {
             return "yellow";
     }
 
+
     // TODO kai komanda 8 baitu, IC painkrementina po 2, nors UI si komanda tik vienoje eiluteje - del to skipina
     private void setNextCommand() {
         int commandIndex = processor.IC.getValue();
@@ -360,7 +406,6 @@ public class RealMachine {
 
     @FXML
     private TextField sumbitField;
-
     @FXML
     private void submitInput(ActionEvent submitEvent) {
         String input = sumbitField.getText();
@@ -370,6 +415,23 @@ public class RealMachine {
         if (input.contains("./")) {
             run(input);
         }
+        else if (outputField.getText().contains("Type")) {
+            processSCANCommand(input);
+        }
+    }
+
+    private void processSCANCommand(String input) {
+        int counter = 0;
+        String symbolNumber = "";
+        while(outputField.getText().charAt(8 + counter) != ' ') {
+            symbolNumber = symbolNumber.concat(String.valueOf(outputField.getText().charAt(8 + counter)));
+            counter++;
+        }
+        while (input.length() - 15 != Integer.valueOf(symbolNumber)) { // 15 - "Keyboard input: " length
+            addToOutput(outputField.getText());
+        }
+        byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
+        virtualMachines.get(0).virtualMemory.putBytesToMemory(Processor.AX.getByteValue()[2], Processor.AX.getByteValue()[3], bytes, bytes.length);
     }
 
     @FXML
@@ -482,6 +544,11 @@ public class RealMachine {
 
     private void addToOutput(String text) {
         if (!text.isBlank())
-            outputField.appendText("\n" + text);
+            outputField.setText(text);
+    }
+
+    private void appendToOutput(String s) {
+        if (!s.isBlank())
+            outputField.appendText("\n" + s);
     }
 }

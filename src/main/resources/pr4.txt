@@ -1,0 +1,10 @@
+@dataseg
+@codeseg
+LDN A FFFF FFFF
+PUSH
+LDNA 12345678
+PUSH
+POPP
+CP B A
+POPP
+HALT

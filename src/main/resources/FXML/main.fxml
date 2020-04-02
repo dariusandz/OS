@@ -38,12 +38,15 @@
                   </VBox>
                   <VBox HBox.hgrow="ALWAYS">
                      <children>
-                        <HBox prefHeight="100.0" prefWidth="327.0" VBox.vgrow="ALWAYS">
+                        <HBox prefHeight="200.0" prefWidth="340.0" VBox.vgrow="ALWAYS">
                            <children>
                               <TextArea id="output-field" fx:id="outputField" editable="false" nodeOrientation="LEFT_TO_RIGHT" prefHeight="100.0" prefWidth="340.0" text="output" />
                            </children>
                         </HBox>
-                        <HBox prefHeight="278.0" prefWidth="340.0" VBox.vgrow="ALWAYS" />
+                        <HBox fx:id="deviceTableContainer" alignment="CENTER" prefHeight="278.0" prefWidth="340.0" VBox.vgrow="ALWAYS">
+                           <children>
+                              <TableView fx:id="deviceTable" prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                           </children></HBox>
                         <HBox alignment="BOTTOM_CENTER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="1.0" prefWidth="340.0">
                            <children>
                               <HBox prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS">

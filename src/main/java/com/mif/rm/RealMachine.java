@@ -211,7 +211,7 @@ public class RealMachine {
         refreshRegisters();
         refreshVirtualMachineList();
         refreshDeviceTable();
-        setNextCommand();
+        setNextCommand(1);
         refreshVirtualMachineMemoryTable();
     }
 
@@ -408,10 +408,9 @@ public class RealMachine {
             return "yellow";
     }
 
-
-    // TODO kai komanda 8 baitu, IC painkrementina po 2, nors UI si komanda tik vienoje eiluteje - del to skipina
-    private void setNextCommand() {
-        int commandIndex = processor.IC.getValue();
+    private void setNextCommand(int commandIndex) {
+        if(commandIndex != 0)
+            commandIndex = commandTable.getSelectionModel().getFocusedIndex() + 1;
         commandTable.getSelectionModel().clearSelection();
         commandTable.requestFocus();
         commandTable.getSelectionModel().select(commandIndex);
@@ -496,7 +495,7 @@ public class RealMachine {
             commandTable.getItems().add(tableRow);
         });
 
-        setNextCommand();
+        setNextCommand(0);
         FXUtil.fitChildrenToContainer(commandContainer);
         FXUtil.resizeEquallyTableColumns(commandTable);
     }

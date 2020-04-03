@@ -22,7 +22,7 @@ public class ByteUtil {
         return word.getBytes()[i];
     }
 
-    public static byte[] minifyHex(String hex) {
+    public static byte[] stringHexToBytes(String hex) {
         byte[] hexBytes = new byte[hex.length() / 2];
         for (int i = 0; i < hex.length(); i += 2) {
             hexBytes[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)

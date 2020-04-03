@@ -2,6 +2,7 @@ package com.mif.rm;
 
 import com.mif.FXModel.CommandTableRow;
 import com.mif.FXModel.DeviceTableRow;
+import com.mif.FXModel.EditCell;
 import com.mif.FXModel.MemoryTableRow;
 import com.mif.FXModel.PagingTableRow;
 import com.mif.FXModel.RegisterTableRow;
@@ -17,7 +18,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -26,6 +29,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -554,6 +558,7 @@ public class RealMachine {
         memoryTable.getColumns().add(indexCol);
 
         memoryTable.setPrefWidth(memoryTablePane.getPrefWidth());
+        memoryTable.setEditable(true);
 
         for (int row = 0; row < Memory.defaultMemorySize / (Memory.pageSize * Memory.wordLen); row++) {
             MemoryTableRow memoryTableRow = new MemoryTableRow(row);
@@ -564,16 +569,33 @@ public class RealMachine {
             memoryTable.getItems().add(memoryTableRow);
         }
 
+        Callback<TableColumn<MemoryTableRow, String>, TableCell<MemoryTableRow, String>> cellFactory
+                = (TableColumn<MemoryTableRow, String> param) -> new EditCell();
+
         for (int col = 0; col < Memory.pageSize; col++) {
             TableColumn<MemoryTableRow, String> column = new TableColumn<>(String.valueOf(col));
+
             column.setCellValueFactory(FXUtil.createArrayValueFactory(MemoryTableRow::getValues, col));
+            column.setCellFactory(cellFactory);
             column.setSortable(false);
-            column.setEditable(false);
+            column.setEditable(true);
+            column.setId(String.valueOf(col));
+            column.setOnEditCommit(
+                (TableColumn.CellEditEvent<MemoryTableRow, String> t) -> {
+                    final TablePosition pos = t.getTablePosition();
+                    editMemory(pos.getRow(), Integer.parseInt(pos.getTableColumn().getId()), t.getNewValue());
+                }
+            );
+
             memoryTable.getColumns().add(column);
         }
 
         FXUtil.fitChildrenToContainer(memoryTablePane);
         FXUtil.autoResizeColumnsOnTextSize(memoryTable);
+    }
+
+    private void editMemory(int page, int block, String word) {
+        memory.putWord(page, block, ByteUtil.stringHexToBytes(word));
     }
 
     @FXML

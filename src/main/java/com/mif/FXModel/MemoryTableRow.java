@@ -5,7 +5,7 @@ import com.mif.rm.Memory;
 
 import java.nio.ByteBuffer;
 
-public class MemoryTableRow {
+public class MemoryTableRow extends HexValueRow {
 
     public Integer pageNumber;
     public String[] wordHexValues = new String[Memory.pageSize];

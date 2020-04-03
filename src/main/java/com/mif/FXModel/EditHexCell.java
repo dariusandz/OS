@@ -4,11 +4,11 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 
-public class EditCell extends TableCell<MemoryTableRow, String> {
+public class EditHexCell <T extends HexValueRow> extends TableCell<T, String> {
 
     private TextField textField;
 
-    public EditCell() { }
+    public EditHexCell() { }
 
     @Override
     public void startEdit() {

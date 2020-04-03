@@ -1,6 +1,6 @@
 package com.mif.FXModel;
 
-public class RegisterTableRow {
+public class RegisterTableRow extends HexValueRow {
 
     String name;
     String value;

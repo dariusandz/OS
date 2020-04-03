@@ -2,7 +2,7 @@ package com.mif.rm;
 
 import com.mif.FXModel.CommandTableRow;
 import com.mif.FXModel.DeviceTableRow;
-import com.mif.FXModel.EditCell;
+import com.mif.FXModel.EditHexCell;
 import com.mif.FXModel.MemoryTableRow;
 import com.mif.FXModel.PagingTableRow;
 import com.mif.FXModel.RegisterTableRow;
@@ -514,6 +514,7 @@ public class RealMachine {
 
     private void renderRegisters() {
         registerTable.setPrefWidth(registersContainer.getPrefWidth());
+        registerTable.setEditable(true);
 
         TableColumn<RegisterTableRow, String> column1 = new TableColumn<>("Register");
         column1.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -521,11 +522,22 @@ public class RealMachine {
         column1.setSortable(false);
         column1.setEditable(false);
 
+        Callback<TableColumn<RegisterTableRow, String>, TableCell<RegisterTableRow, String>> cellFactory
+                = (TableColumn<RegisterTableRow, String> param) -> new EditHexCell();
+
         TableColumn<RegisterTableRow, String> column2 = new TableColumn<>("Value");
         column2.setCellValueFactory(new PropertyValueFactory<>("value"));
 
         column2.setSortable(false);
-        column2.setEditable(false);
+        column2.setEditable(true);
+        column2.setCellFactory(cellFactory);
+
+        column2.setOnEditCommit(
+                (TableColumn.CellEditEvent<RegisterTableRow, String> t) -> {
+                    final TablePosition pos = t.getTablePosition();
+                    editRegister(readonlyRegisters.get(pos.getRow()).field, t.getNewValue());
+                }
+        );
 
         registerTable.getColumns().addAll(column1, column2);
 
@@ -542,6 +554,10 @@ public class RealMachine {
 
         FXUtil.fitChildrenToContainer(registersContainer);
         FXUtil.resizeEquallyTableColumns(registerTable);
+    }
+
+    private void editRegister(Field registerNameField, String value) {
+        processor.setRegister(registerNameField, ByteUtil.stringHexToBytes(value));
     }
 
     @FXML
@@ -570,7 +586,7 @@ public class RealMachine {
         }
 
         Callback<TableColumn<MemoryTableRow, String>, TableCell<MemoryTableRow, String>> cellFactory
-                = (TableColumn<MemoryTableRow, String> param) -> new EditCell();
+                = (TableColumn<MemoryTableRow, String> param) -> new EditHexCell();
 
         for (int col = 0; col < Memory.pageSize; col++) {
             TableColumn<MemoryTableRow, String> column = new TableColumn<>(String.valueOf(col));

@@ -1,14 +1,12 @@
 package com.mif.rm;
 
-import com.mif.common.ByteUtil;
 import com.mif.vm.VirtualMemory;
 import javafx.util.Pair;
 
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 
 public class Processor {
 
@@ -195,7 +193,23 @@ public class Processor {
         return null;
     }
 
-    void resetRegisterValues() {
+    public void resetRegisterValues() {
         initializeRegisters();
+    }
+
+    public void setRegister(Field regField, byte[] value) {
+        Field[] fields = this.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            if (field.getType().equals(Register.class)) {
+                field.setAccessible(true);
+                if (regField.getName().equals(field.getName())) {
+                    try {
+                        ((Register) field.get(processor)).setValue(value);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     }
 }

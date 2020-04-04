@@ -310,7 +310,6 @@ public class RealMachine {
                     deviceTableRows.stream()
                         .filter(r -> r.getId() == device.getId())
                         .findFirst();
-
             // Naujas devicas
             if (row.isEmpty()) {
                 DeviceTableRow deviceTableRow = new DeviceTableRow(device);
@@ -526,6 +525,10 @@ public class RealMachine {
             return;
         addToOutput("Keyboard input: " + input);
         if (input.contains("./")) {
+            if(currentVm != null){
+                saveVMRegisters();
+                processor.resetRegisterValues();
+            }
             run(input);
         }
         else if (outputField.getText().contains("Type")) {

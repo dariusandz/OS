@@ -7,4 +7,8 @@ public class OutOfMemoryException extends RuntimeException {
     public OutOfMemoryException(String message) {
         this.message = "Klaida: " + message;
     }
+
+    public String getMessage() {
+        return this.message;
+    }
 }

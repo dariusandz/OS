@@ -219,7 +219,7 @@ public class RealMachine {
         try {
             virtualMachine = new VirtualMachine(programFileName, params);
         } catch (OutOfMemoryException e) {
-            addToOutput(e.getMessage());
+            appendToOutput(e.getMessage());
             return false;
         }
 
@@ -526,7 +526,7 @@ public class RealMachine {
         String input = sumbitField.getText();
         if (input.isBlank())
             return;
-        addToOutput("Keyboard input: " + input);
+        appendToOutput("Keyboard input: " + input);
         if (input.contains("./")) {
             run(input);
         }

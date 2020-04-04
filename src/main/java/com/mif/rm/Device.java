@@ -12,7 +12,7 @@ public class Device {
     private DeviceState state;
 
     public Device(DeviceType type) {
-        this.id = generator.getId();
+        this.id = generator.getDeviceId();
         this.type = type;
         this.value = 10;
         this.state = DeviceState.OFF;

@@ -2,7 +2,6 @@ package com.mif.vm;
 
 import com.mif.common.FileReader;
 import com.mif.common.IdGenerator;
-import com.mif.exception.OutOfMemoryException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,7 @@ public class VirtualMachine {
         this.virtualMemory = new VirtualMemory(params);
         this.virtualProcessor = new VirtualProcessor(virtualMemory);
         this.programFileName = programFileName;
-        this.id = idGenerator.getId();
+        this.id = idGenerator.getVmId();
     }
 
     public Long getId() {

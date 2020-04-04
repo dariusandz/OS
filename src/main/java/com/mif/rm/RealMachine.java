@@ -594,7 +594,7 @@ public class RealMachine {
             symbolNumber = symbolNumber.concat(String.valueOf(outputField.getText().charAt(8 + counter)));
             counter++;
         }
-        while (input.length() - 15 != Integer.valueOf(symbolNumber)) { // 15 - "Keyboard input: " length
+        while (input.length() != Integer.valueOf(symbolNumber)) {
             addToOutput(outputField.getText());
         }
         byte[] bytes = input.getBytes(StandardCharsets.UTF_8);

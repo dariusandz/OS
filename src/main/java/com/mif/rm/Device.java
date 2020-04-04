@@ -51,4 +51,14 @@ public class Device {
     public DeviceState getState() {
         return this.state;
     }
+
+    public void tick() {
+        switch (this.type) {
+            case BATTERY:
+                if (this.state == DeviceState.OFF)
+                    this.value += 2;
+                else this.value -= 2;
+                break;
+        }
+    }
 }

@@ -84,11 +84,10 @@ public class Processor {
                 else {
                     switch (BX.getValue()) {
                         case 0:
-                            devices.get(AX.getValue()-1).onOffSwitch(DeviceState.parseState(BX.getValue()));
-                            break;
                         case 1:
-                            devices.get(AX.getValue() - 1).onOffSwitch(
-                                    DeviceState.parseState(BX.getValue())
+                            devices.get(
+                                    AX.getValue() - 1).onOffSwitch(
+                                            DeviceState.parseState(BX.getValue())
                             );
                             break;
                         case 2:
@@ -160,8 +159,11 @@ public class Processor {
                 if(devices.size() < AX.getValue()) {
                     return new Pair<>(10, "Error: Bad device index");
                 }
-                else devices.remove(AX.getValue() - 1);
-                break;
+                else {
+                    Device deviceToRemove = devices.get(AX.getValue() - 1);
+                    devices.remove(deviceToRemove);
+                    return new Pair<>(11, deviceToRemove.getId().toString());
+                }
             default:
                 SI.setValue(0);
                 return null;
@@ -171,6 +173,10 @@ public class Processor {
     }
 
     String processTIValue() {
+        devices.forEach(device ->
+                device.tick()
+        );
+
         if(TI.getValue() <= 0) {
             return "Error: Timer is over";
         }

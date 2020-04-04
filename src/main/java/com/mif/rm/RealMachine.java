@@ -123,6 +123,9 @@ public class RealMachine {
                 addToOutput(siValuePair.getValue());
                 return false;
             }
+            if (siValuePair.getKey() == 11) {
+                removeFromDeviceTable(siValuePair.getValue());
+            }
         }
         if(processor.processTIValue() != null) {
             addToOutput(processor.processTIValue());
@@ -231,7 +234,6 @@ public class RealMachine {
             for (int j = 0; j < memoryTableRow.wordHexValues.length; j++) {
                 memoryTableRow.setWord(j, ByteUtil.bytesToHex(memory.getWord(i,j)));
             }
-            memoryTableRows.set(i,memoryTableRow);
         }
         memoryTable.refresh();
     }
@@ -269,12 +271,36 @@ public class RealMachine {
     // NOT SURE GOING SLEEP
     private void refreshDeviceTable() {
         processor.devices.forEach(device -> {
-            if (!deviceTableRows.stream().anyMatch(row -> row.getId() == device.getId())) {
+            Optional<DeviceTableRow> row =
+                    deviceTableRows.stream()
+                        .filter(r -> r.getId() == device.getId())
+                        .findFirst();
+
+            // Naujas devicas
+            if (row.isEmpty()) {
                 DeviceTableRow deviceTableRow = new DeviceTableRow(device);
                 deviceTableRows.add(deviceTableRow);
                 deviceTable.getItems().add(deviceTableRow);
+            } else { // Paupdeitint devica
+                int deviceRowIndex = deviceTableRows.indexOf(row.get());
+                deviceTableRows.get(deviceRowIndex).set(device);
             }
         });
+        deviceTable.refresh();
+    }
+
+    private void removeFromDeviceTable(String deviceId) {
+        Long idOfDevice = Long.valueOf(deviceId);
+        // Jei istrina is devicu, turi istrint ir is tablo
+        if (processor.devices.size() != deviceTableRows.size()) {
+            DeviceTableRow removedDeviceTableRow =
+                deviceTableRows.stream()
+                    .filter(device -> device.getId() == idOfDevice)
+                    .findFirst().get();
+            deviceTableRows.remove(removedDeviceTableRow);
+            deviceTable.getItems().remove(removedDeviceTableRow);
+        }
+        deviceTable.refresh();
     }
 
     @FXML
@@ -284,14 +310,21 @@ public class RealMachine {
     private TableView deviceTable;
 
     private void renderDeviceTable() {
+        deviceTable.setPrefWidth(deviceTableContainer.getPrefWidth());
+        deviceTable.setEditable(false);
+
         TableColumn<DeviceTableRow, String> deviceTypeCol = new TableColumn<>("Device");
         deviceTypeCol.setCellValueFactory(new PropertyValueFactory<>("Type"));
+        deviceTypeCol.setEditable(false);
 
         TableColumn<DeviceTableRow, Integer> deviceValueCol = new TableColumn<>("Value");
         deviceValueCol.setCellValueFactory(new PropertyValueFactory<>("Value"));
+        deviceValueCol.setEditable(false);
 
         TableColumn<DeviceTableRow, String> deviceStateCol = new TableColumn<>("State");
         deviceStateCol.setCellValueFactory(new PropertyValueFactory<>("State"));
+        deviceStateCol.setEditable(false);
+
 
         deviceTable.getColumns().addAll(deviceTypeCol, deviceValueCol, deviceStateCol);
 
@@ -356,11 +389,14 @@ public class RealMachine {
 
     private TableView getPagingTable(VirtualMachine vm) {
         TableView tableView = new TableView();
+        tableView.setEditable(false);
 
         String color;
         for (int col = 0; col < Memory.pageSize; col++) {
             TableColumn<PagingTableRow, Integer> column = new TableColumn<>(String.valueOf(col));
             column.setCellValueFactory(FXUtil.createArrayValueFactory(PagingTableRow::getRmPages, col));
+            column.setEditable(false);
+            column.setSortable(false);
             tableView.getColumns().add(column);
 //            column.setStyle("-fx-background-color: " + getSegmentColor(col));
         }
@@ -376,6 +412,7 @@ public class RealMachine {
 
     private TableView getVmMemoryTable(VirtualMachine vm) {
         TableView tableView = new TableView();
+        tableView.setEditable(false);
 
         TableColumn<MemoryTableRow, Integer> indexCol = new TableColumn<>("Page");
         indexCol.setCellValueFactory(new PropertyValueFactory<>("pageNumber"));

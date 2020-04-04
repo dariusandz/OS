@@ -1,6 +1,7 @@
 package com.mif.vm;
 
 import com.mif.common.ByteUtil;
+import com.mif.exception.OutOfMemoryException;
 import com.mif.rm.Processor;
 import com.mif.rm.Register;
 import com.mif.rm.Memory;
@@ -27,6 +28,9 @@ public class PagingTable {
 
     // Requests unused memory pages from real memory
     public void requestPages(int pageCount) {
+        if (memoryInstance.getFreePagesCount() < 16)
+            throw new OutOfMemoryException("Nebeliko laisvos atminties");
+
         for (int i = 0; i < pageCount; i++) {
             int realMemoryPage = memoryInstance.requestPage();
             if (realMemoryPage != -1) {

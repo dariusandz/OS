@@ -9,7 +9,10 @@ public class Memory {
     public static final int pageSize = 16;
     public static final int wordLen = 4;
     public static final int defaultMemorySize = 4096;
+
     public static final int VM_REGISTERS_ADDRESS = 0;
+
+    public static final int pageCount = defaultMemorySize / (pageSize * wordLen);
 
     static Memory globalMemory = getInstance();
 
@@ -121,16 +124,19 @@ public class Memory {
         }
         occupiedPageNumber.remove(occupiedPageNumber.indexOf(oldVMAddress));
         while (true) {
-            if(vmRegisters.size() < 13) {
+            if (vmRegisters.size() < 13) {
                 byte[] bytes = Arrays.copyOfRange(memory, oldVMAddress * pageSize * wordLen + vmRegisters.size() * wordLen,
                         oldVMAddress * pageSize * wordLen + vmRegisters.size() * wordLen + wordLen);
                 for (int i = 0; i < wordLen; i++) {
                     memory[oldVMAddress * pageSize * wordLen + vmRegisters.size() * wordLen + i] = 0;
                 }
                 vmRegisters.add(ByteUtil.byteToInt(bytes));
-            }
-            else break;
+            } else break;
         }
         return vmRegisters;
+    }
+
+    public int getFreePagesCount() {
+        return pageCount - occupiedPageNumber.size();
     }
 }

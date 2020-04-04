@@ -10,6 +10,10 @@ import com.mif.Main;
 import com.mif.common.ByteUtil;
 import com.mif.common.FXUtil;
 import com.mif.FXModel.RegisterInstance;
+import com.mif.exception.FatalInterruptException;
+import com.mif.exception.HarmlessInterruptException;
+import com.mif.exception.InterruptException;
+import com.mif.exception.OutOfMemoryException;
 import com.mif.vm.VirtualMachine;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -98,7 +102,9 @@ public class RealMachine {
             currentVm = getRunningVmById(idOfRunningMachine);
             currentVm.processCommand();
 
-            if (!processInterrupts()){
+            try {
+                processInterrupts();
+            } catch (FatalInterruptException e) {
                 cleanupVm(currentVm);
                 if(currentVm != null)
                     loadVMRegisters();
@@ -108,41 +114,30 @@ public class RealMachine {
         }
     }
 
-    private boolean processInterrupts() {
-        Pair<Integer, String> siValuePair = processor.processSIValue(currentVm.virtualMemory);
-        if(siValuePair != null){
-            if(siValuePair.getKey() == 3) {
-                return false;
+    private void processInterrupts() {
+        try {
+            Pair<Integer, String> siValuePair = processor.processSIValue(currentVm.virtualMemory);
+            if (siValuePair != null) {
+                if (siValuePair.getKey() == 1) {
+                    addToOutput(siValuePair.getValue());
+                } else if (siValuePair.getKey() ==  2 || siValuePair.getKey() == 4) {
+                    addToOutput(siValuePair.getValue());
+                } else if (siValuePair.getKey() == 5) {
+                    saveVMRegisters();
+                    processor.resetRegisterValues();
+                    run(siValuePair.getValue());
+                } else if (siValuePair.getKey() == 11) {
+                    removeFromDeviceTable(siValuePair.getValue());
+                }
             }
-            if(siValuePair.getKey() == 5){
-                Processor.SI.setValue(0);
-                saveVMRegisters();
-                processor.resetRegisterValues();
-                run(siValuePair.getValue());
-            }
-            if(siValuePair.getKey() == 1) {
-                addToOutput(siValuePair.getValue());
-            }
-            if(siValuePair.getKey() ==  2 || siValuePair.getKey() == 4){
-                addToOutput(siValuePair.getValue());
-            }
-            if(siValuePair.getValue().contains("Error")) {
-                addToOutput(siValuePair.getValue());
-                return false;
-            }
-            if (siValuePair.getKey() == 11) {
-                removeFromDeviceTable(siValuePair.getValue());
-            }
+
+            processor.processTIValue();
+            processor.processPIValue();
+        } catch (FatalInterruptException | HarmlessInterruptException e) {
+            addToOutput(e.getLocalCause());
+            updateUI();
+            throw e;
         }
-        if(processor.processTIValue() != null) {
-            addToOutput(processor.processTIValue());
-            return false;
-        }
-        if(processor.processPIValue() != null) {
-            addToOutput(processor.processPIValue());
-            return false;
-        }
-        return true;
     }
 
     private void loadVMRegisters() {
@@ -180,7 +175,6 @@ public class RealMachine {
         vmCommands.remove(vm.getId());
         virtualMachines.remove(vm);
         currentVm = null;
-        appendToOutput("Virtuali masina su id [" + idOfRunningMachine + "] baige darba.");
         idOfRunningMachine = Long.valueOf(-1);
         processor.resetRegisterValues();
         if(virtualMachines.size() > 0) {
@@ -197,7 +191,7 @@ public class RealMachine {
     }
 
     private void run(String runCommand) {
-        if(!initializeVirtualMachine(runCommand))
+        if (!initializeVirtualMachine(runCommand))
             return;
         renderCommandTable();
         refreshMemoryTable();
@@ -221,14 +215,22 @@ public class RealMachine {
         List<String> params = getParams(splitCommand);
         String programFileName = splitCommand[0];
 
-        VirtualMachine virtualMachine = new VirtualMachine(programFileName, params);
+        VirtualMachine virtualMachine = null;
+        try {
+            virtualMachine = new VirtualMachine(programFileName, params);
+        } catch (OutOfMemoryException e) {
+            addToOutput(e.getMessage());
+            return false;
+        }
+
         Long id = virtualMachine.getId();
         List<String> virtualMachinesCommands = virtualMachine.loadProgram();
-        if(virtualMachinesCommands == null){
+        if (virtualMachinesCommands == null) {
             addToOutput("Invalid file");
             cleanupVm(virtualMachine);
             return false;
         }
+
         this.vmCommands.put(id, virtualMachinesCommands);
         this.virtualMachines.add(virtualMachine);
         // TODO temporary, kol gali veikti tik viena VM

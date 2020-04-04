@@ -16,8 +16,8 @@ public class VirtualMemory implements IMemory {
     public static final int DATASEG_START_PAGE = 1;
     private static final int CODESEG_START_PAGE = 4;
 
-    private static int pageSize = 16;
 
+    private static int pageSize = 16;
     protected static int wordSize = 4;
     protected static int hexSize = 8;
 

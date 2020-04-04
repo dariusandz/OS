@@ -2,6 +2,7 @@ package com.mif.vm;
 
 import com.mif.common.FileReader;
 import com.mif.common.IdGenerator;
+import com.mif.exception.OutOfMemoryException;
 
 import java.util.ArrayList;
 import java.util.List;

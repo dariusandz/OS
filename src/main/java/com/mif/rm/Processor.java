@@ -1,5 +1,8 @@
 package com.mif.rm;
 
+import com.mif.exception.FatalInterruptException;
+import com.mif.exception.HarmlessInterruptException;
+import com.mif.exception.InterruptException;
 import com.mif.vm.VirtualMemory;
 import javafx.util.Pair;
 
@@ -49,36 +52,38 @@ public class Processor {
     }
 
     public Pair<Integer, String> processSIValue(VirtualMemory virtualMemory) {
-        switch (SI.getValue()) {
+        int SIValue = SI.getValue();
+        SI.setValue(0);
+        switch (SIValue) {
             case 1:
                 int letterCount = BX.getValue();
-                return new Pair<>(1, "Type in " + letterCount + " symbols");
+                return new Pair<>(SIValue, "Type in " + letterCount + " symbols");
             case 2:
                 byte[] bytes1 = virtualMemory.getBytesFromMemory(AX.getByteValue()[2], AX.getByteValue()[3], BX.getValue());
-                return new Pair<>(2, new String(bytes1, StandardCharsets.UTF_8));
+                return new Pair<>(SIValue, new String(bytes1, StandardCharsets.UTF_8));
             case 3:
-                return new Pair<>(3, null);
+                throw new FatalInterruptException("Virtuali masina baige darba.", "SI: " + SI.getValue());
             case 4:
-                return new Pair<>(4, new String(virtualMemory.getWordFromMemory(AX.getByteValue()[2], AX.getByteValue()[3]), StandardCharsets.UTF_8));
+                return new Pair<>(SIValue, new String(virtualMemory.getWordFromMemory(AX.getByteValue()[2], AX.getByteValue()[3]), StandardCharsets.UTF_8));
             case 5:
                 int fileNamePageNum = Processor.AX.getByteValue()[2];
                 int fileNameWordNum = Processor.AX.getByteValue()[3];
                 byte[] temp;
                 int byteCount = 1;
-                while (true){
+                while (true) {
                     temp = virtualMemory.getBytesFromMemory(fileNamePageNum, fileNameWordNum, byteCount);
-                    if(temp[byteCount-1] == 0)
+                    if (temp[byteCount-1] == 0)
                         break;
                     byteCount++;
-                    if(fileNameWordNum + byteCount/4 == 16) {
+                    if (fileNameWordNum + byteCount/4 == 16) {
                         fileNameWordNum = 0;
                         fileNamePageNum++;
                     }
                 }
-                return new Pair<>(5, new String(temp));
+                return new Pair<>(SIValue, new String(temp));
             case 6:
-                if(devices.size() < AX.getValue()) {
-                    return new Pair<>(6, "Error: Bad device index");
+                if (devices.size() < AX.getValue()) {
+                    throw new HarmlessInterruptException("Klaida: blogas irenginio indeksas", "SI: " + SI.getValue());
                 }
                 else {
                     switch (BX.getValue()) {
@@ -98,39 +103,39 @@ public class Processor {
                             );
                             break;
                         default:
-                            return new Pair<>(6, "Error: Unknown device command");
+                            throw new HarmlessInterruptException("Klaida: nezinoma irenginio komanda", "SI: " + SI.getValue());
                     }
                 }
                 break;
             case 7:
-                if(devices.size() < AX.getValue()) {
-                    return new Pair<>(7, "Error: Bad device index");
+                if (devices.size() < AX.getValue()) {
+                    throw new HarmlessInterruptException("Klaida: blogas irenginio indeksas", "SI: " + SI.getValue());
                 }
                 else {
                     if (devices.get(processor.AX.getValue() - 1).getState() == DeviceState.ON)
                         devices.get(processor.AX.getValue() - 1).setValue(processor.BX.getValue());
                     else {
-                        return new Pair<>(7, "Error: Turn on the device");
+                        throw new HarmlessInterruptException("Klaida: pirmiau reiktu ijungti irengini..",  "SI: " + SI.getValue());
                     }
                 }
                 break;
             case 8:
-                if(devices.size() < AX.getValue()) {
-                    return new Pair<>(8, "Error: Bad device index");
+                if (devices.size() < AX.getValue()) {
+                    throw new HarmlessInterruptException("Klaida: blogas irenginio indeksas", "SI: " + SI.getValue());
                 }
                 else {
-                    if (devices.get(processor.AX.getValue() - 1).getState() == DeviceState.ON){
+                    if (devices.get(processor.AX.getValue() - 1).getState() == DeviceState.ON) {
                         int deviceValue = devices.get(processor.AX.getValue() - 1).getValue();
                         BX.setValue(deviceValue);
                     }
                     else {
-                        return new Pair<>(8, "Error: Turn on the device");
+                        throw new HarmlessInterruptException("Klaida: pirmiau reiktu ijungti irengini..",  "SI: " + SI.getValue());
                     }
                 }
                 break;
             case 9:
-                if(devices.size() < AX.getValue()) {
-                    return new Pair<>(9, "Error: Bad device index");
+                if (devices.size() < AX.getValue()) {
+                    throw new HarmlessInterruptException("Klaida: blogas irenginio indeksas", "SI: " + SI.getValue());
                 }
                 else {
                     if (devices.get(processor.AX.getValue() - 1).getState() == DeviceState.ON)
@@ -138,7 +143,7 @@ public class Processor {
                                 devices.get(processor.AX.getValue() - 1).getIntType()
                         );
                     else {
-                        return new Pair<>(9, "Error: Turn on the device");
+                        throw new HarmlessInterruptException("Klaida: pirmiau reiktu ijungti irengini..",  "SI: " + SI.getValue());
                     }
                 }
                 break;
@@ -148,51 +153,46 @@ public class Processor {
                 else if (processor.AX.getValue() == 2)
                     devices.add(new Device(DeviceType.LED));
                 else {
-                    return new Pair<>(10, "Error: Bad device type");
+                    throw new HarmlessInterruptException("Klaida: blogas irenginio tipas", "SI: " + SI.getValue());
                 }
                 break;
             case 11:
-                if(devices.size() < AX.getValue()) {
-                    return new Pair<>(10, "Error: Bad device index");
-                }
-                else {
+                if (devices.size() < AX.getValue()) {
+                    throw new HarmlessInterruptException("Klaida: blogas irenginio indeksas", "SI: " + SI.getValue());
+                } else {
                     Device deviceToRemove = devices.get(AX.getValue() - 1);
                     devices.remove(deviceToRemove);
-                    return new Pair<>(11, deviceToRemove.getId().toString());
+                    return new Pair<>(SIValue, deviceToRemove.getId().toString());
                 }
             default:
-                SI.setValue(0);
                 return null;
         }
-        SI.setValue(0);
         return null;
     }
 
-    String processTIValue() {
+    public void processTIValue() {
         devices.forEach(device ->
                 device.tick()
         );
 
-        if(TI.getValue() <= 0) {
-            return "Error: Timer is over";
+        if (TI.getValue() <= 0) {
+            throw new FatalInterruptException("Klaida: baigesi taimerio laikas", "TI: " + TI.getValue());
         }
-        return null;
     }
 
-    String processPIValue() {
+    public void processPIValue() {
         switch (Processor.PI.getValue()) {
-            case 0:
-                return null;
             case 1:
-                return "Error: Wrong address";
+                throw new FatalInterruptException("Klaida: neteisingas adresas", "PI: " + PI.getValue());
             case 2:
-                return "Error: Wrong operation code";
+                throw new FatalInterruptException("Klaida: neteisingas operacijos kodas", "PI: " + PI.getValue());
             case 3:
-                return "Error: Wrong assignment";
+                throw new FatalInterruptException("Klaida: neteisingas priskyrimas", "PI: " + PI.getValue());
             case 4:
-                return "Error: Overflow";
+                throw new FatalInterruptException("Klaida: perpildymas (overflow)", "PI: " + PI.getValue());
+            default:
+                return;
         }
-        return null;
     }
 
     public void resetRegisterValues() {

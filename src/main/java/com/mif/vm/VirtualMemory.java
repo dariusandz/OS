@@ -33,6 +33,8 @@ public class VirtualMemory implements IMemory {
         putParamsIntoMemory(params);
     }
 
+
+
     // Gets a word(command) to execute from CODESEG
     public byte[] getCodeWord(int nthWord) {
         return pagingTable.getWordFromMemory(CODESEG_START_PAGE + nthWord/16, nthWord%16);

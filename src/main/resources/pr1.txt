@@ -1,7 +1,8 @@
 @dataseg
 aaaaaaaa,wwwww,cdcdcdcda
 @codeseg
-LDN A 0000AAAA
+LDN A 000000AA
+LDN A 000000AA
 SVR A 00000504
 LDM B 00000504
 LDN B 00000007

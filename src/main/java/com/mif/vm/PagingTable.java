@@ -6,6 +6,7 @@ import com.mif.rm.Register;
 import com.mif.rm.Memory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PagingTable {
@@ -62,5 +63,14 @@ public class PagingTable {
 
     public void freeMemory() {
         memoryInstance.freeVMMemory(pageMap, Processor.PTR.getValue());
+    }
+
+    public void saveVMRegisters(List<Integer> registerValues) {
+        int vMRegisterAddress = memoryInstance.setVmRegistersAddress();
+        memoryInstance.saveVMRegisters(vMRegisterAddress, registerValues);
+    }
+
+    public List<Integer> loadVMRegisters() {
+        return memoryInstance.loadVMRegisters();
     }
 }

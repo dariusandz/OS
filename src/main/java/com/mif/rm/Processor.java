@@ -48,7 +48,6 @@ public class Processor {
         ZF = new Register();
     }
 
-
     public Pair<Integer, String> processSIValue(VirtualMemory virtualMemory) {
         switch (SI.getValue()) {
             case 1:
@@ -123,10 +122,7 @@ public class Processor {
                 else {
                     if (devices.get(processor.AX.getValue() - 1).getState() == DeviceState.ON){
                         int deviceValue = devices.get(processor.AX.getValue() - 1).getValue();
-                        if(deviceValue == 10)
-                            BX.setValue(new byte[] {0, 0, '1', '0'} );
-                        else
-                            BX.setValue(new byte[] {0, 0, 0, (byte) (deviceValue+'0')});
+                        BX.setValue(deviceValue);
                     }
                     else {
                         return new Pair<>(8, "Error: Turn on the device");

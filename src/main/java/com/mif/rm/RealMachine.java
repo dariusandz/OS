@@ -43,6 +43,8 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
+import static com.mif.rm.Memory.globalMemory;
+
 public class RealMachine {
     // TODO reikia padaryt kad butu GUI galima pakeisti registru reiksmes ir atminti :(
     // TODO Leistų užkrauti kitas vartotojų programas ir valdymas būtų atiduodamas vėliausiai užkrautajai (jei laisvos atminties nepakanka apie tai pranešama)...... cia :(((((
@@ -94,10 +96,13 @@ public class RealMachine {
     public void step() {
         if (currentVm != null) {
             currentVm = getRunningVmById(idOfRunningMachine);
-            String command = currentVm.processCommand();
+            currentVm.processCommand();
 
-            if (!processInterrupts())
+            if (!processInterrupts()){
                 cleanupVm(currentVm);
+                if(currentVm != null)
+                    loadVMRegisters();
+            }
 
             updateUI();
         }
@@ -110,8 +115,10 @@ public class RealMachine {
                 return false;
             }
             if(siValuePair.getKey() == 5){
+                Processor.SI.setValue(0);
+                saveVMRegisters();
+                processor.resetRegisterValues();
                 run(siValuePair.getValue());
-                processor.SI.setValue(0);
             }
             if(siValuePair.getKey() == 1) {
                 addToOutput(siValuePair.getValue());
@@ -135,6 +142,36 @@ public class RealMachine {
         return true;
     }
 
+    private void loadVMRegisters() {
+        List<Integer> registerValues = currentVm.virtualMemory.pagingTable.loadVMRegisters();
+        Field[] fields = processor.getClass().getDeclaredFields();
+        int registerCounter = 0;
+        for (int i = 0; i < fields.length; i++) {
+            if(fields[i].getType().equals(Register.class)) {
+                processor.setRegister(fields[i], ByteUtil.intToBytes(registerValues.get(registerCounter)));
+                registerCounter++;
+            }
+        }
+    }
+
+    private void saveVMRegisters() {
+        List<Integer> registerValues = new ArrayList<>();
+        Field[] fields = processor.getClass().getDeclaredFields();
+        for (Field field: fields) {
+            if (field.getType().equals(Register.class)) {
+                field.setAccessible(true);
+                Register r = null;
+                try {
+                    r = (Register) field.get(processor);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+                registerValues.add(r.getValue());
+            }
+        }
+        currentVm.virtualMemory.pagingTable.saveVMRegisters(registerValues);
+    }
+
     private void cleanupVm(VirtualMachine vm) {
         vm.freeMemory();
         vmCommands.remove(vm.getId());
@@ -147,7 +184,7 @@ public class RealMachine {
             this.currentVm = virtualMachines.get(0);
             this.idOfRunningMachine = virtualMachines.get(0).getId();
         }
-        cleanupUI();
+        else cleanupUI();
     }
 
     private void cleanupUI() {
@@ -192,10 +229,8 @@ public class RealMachine {
         this.vmCommands.put(id, virtualMachinesCommands);
         this.virtualMachines.add(virtualMachine);
         // TODO temporary, kol gali veikti tik viena VM
-        if(this.currentVm == null) {
-            this.idOfRunningMachine = virtualMachine.getId();
-            this.currentVm = virtualMachine;
-        }
+        this.idOfRunningMachine = virtualMachine.getId();
+        this.currentVm = virtualMachine;
         this.refreshVirtualMachineList();
         return true;
     }

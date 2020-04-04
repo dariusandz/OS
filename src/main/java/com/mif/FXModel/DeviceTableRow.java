@@ -25,6 +25,11 @@ public class DeviceTableRow {
         this.state = device.getState();
     }
 
+    public void set(Device device) {
+        this.value = device.getValue();
+        this.state = device.getState();
+    }
+
     public Long getId() {
         return id;
     }

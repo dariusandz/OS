@@ -10,6 +10,9 @@ import com.mif.Main;
 import com.mif.common.ByteUtil;
 import com.mif.common.FXUtil;
 import com.mif.FXModel.RegisterInstance;
+import com.mif.exception.FatalInterruptException;
+import com.mif.exception.HarmlessInterruptException;
+import com.mif.exception.OutOfMemoryException;
 import com.mif.vm.VirtualMachine;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -42,8 +45,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.IntStream;
-
-import static com.mif.rm.Memory.globalMemory;
 
 public class RealMachine {
     // TODO reikia padaryt kad butu GUI galima pakeisti registru reiksmes ir atminti :(
@@ -98,9 +99,11 @@ public class RealMachine {
             currentVm = getRunningVmById(idOfRunningMachine);
             currentVm.processCommand();
 
-            if (!processInterrupts()){
+            try {
+                processInterrupts();
+            } catch (FatalInterruptException e) {
                 cleanupVm(currentVm);
-                if(currentVm != null)
+                if (currentVm != null)
                     loadVMRegisters();
             }
 
@@ -108,41 +111,31 @@ public class RealMachine {
         }
     }
 
-    private boolean processInterrupts() {
-        Pair<Integer, String> siValuePair = processor.processSIValue(currentVm.virtualMemory);
-        if(siValuePair != null){
-            if(siValuePair.getKey() == 3) {
-                return false;
+    private void processInterrupts() {
+        try {
+            Pair<Integer, String> siValuePair = processor.processSIValue(currentVm.virtualMemory);
+            if (siValuePair != null) {
+                if (siValuePair.getKey() == 1) {
+                    addToOutput(siValuePair.getValue());
+                } else if (siValuePair.getKey() ==  2 || siValuePair.getKey() == 4) {
+                    addToOutput(siValuePair.getValue());
+                } else if (siValuePair.getKey() == 5) {
+                    saveVMRegisters();
+                    processor.resetRegisterValues();
+                    stoppedAtCommand.put(idOfRunningMachine, getCommandIndex());
+                    run(siValuePair.getValue());
+                } else if (siValuePair.getKey() == 11) {
+                    removeFromDeviceTable(siValuePair.getValue());
+                }
             }
-            if(siValuePair.getKey() == 5){
-                Processor.SI.setValue(0);
-                saveVMRegisters();
-                processor.resetRegisterValues();
-                run(siValuePair.getValue());
-            }
-            if(siValuePair.getKey() == 1) {
-                addToOutput(siValuePair.getValue());
-            }
-            if(siValuePair.getKey() ==  2 || siValuePair.getKey() == 4){
-                addToOutput(siValuePair.getValue());
-            }
-            if(siValuePair.getValue().contains("Error")) {
-                addToOutput(siValuePair.getValue());
-                return false;
-            }
-            if (siValuePair.getKey() == 11) {
-                removeFromDeviceTable(siValuePair.getValue());
-            }
+
+            processor.processTIValue();
+            processor.processPIValue();
+        } catch (FatalInterruptException | HarmlessInterruptException e) {
+            addToOutput(e.getLocalCause());
+            updateUI();
+            throw e;
         }
-        if(processor.processTIValue() != null) {
-            addToOutput(processor.processTIValue());
-            return false;
-        }
-        if(processor.processPIValue() != null) {
-            addToOutput(processor.processPIValue());
-            return false;
-        }
-        return true;
     }
 
     private void loadVMRegisters() {
@@ -178,35 +171,34 @@ public class RealMachine {
     private void cleanupVm(VirtualMachine vm) {
         vm.freeMemory();
         vmCommands.remove(vm.getId());
+        commandTableRowMap.remove(vm.getId());
         virtualMachines.remove(vm);
         currentVm = null;
-        appendToOutput("Virtuali masina su id [" + idOfRunningMachine + "] baige darba.");
         idOfRunningMachine = Long.valueOf(-1);
         processor.resetRegisterValues();
-        if(virtualMachines.size() > 0) {
-            this.currentVm = virtualMachines.get(0);
-            this.idOfRunningMachine = virtualMachines.get(0).getId();
-        }
-        else cleanupUI();
+        if (virtualMachines.size() > 0) {
+            this.currentVm = virtualMachines.get((int) (vm.getId() - 1));
+            this.idOfRunningMachine = virtualMachines.get((int) (vm.getId() - 1)).getId();
+        } else
+            cleanupUI();
     }
 
     private void cleanupUI() {
         commandTable.getItems().clear();
-        commandTable.getColumns().clear();
         vmChoiceBox.getItems().clear();
     }
 
     private void run(String runCommand) {
-        if(!initializeVirtualMachine(runCommand))
+        if (!initializeVirtualMachine(runCommand))
             return;
-        renderCommandTable();
+        putCommandsToTable();
         refreshMemoryTable();
         refreshRegisters();
     }
 
     private VirtualMachine getRunningVmById(Long id) {
         OptionalInt optIndex = IntStream.range(0, virtualMachines.size())
-            .filter(ind -> idOfRunningMachine == virtualMachines.get(ind).getId())
+            .filter(ind -> id == virtualMachines.get(ind).getId())
             .findFirst();
 
         if (optIndex.isEmpty()) {
@@ -221,14 +213,22 @@ public class RealMachine {
         List<String> params = getParams(splitCommand);
         String programFileName = splitCommand[0];
 
-        VirtualMachine virtualMachine = new VirtualMachine(programFileName, params);
+        VirtualMachine virtualMachine = null;
+        try {
+            virtualMachine = new VirtualMachine(programFileName, params);
+        } catch (OutOfMemoryException e) {
+            appendToOutput(e.getMessage());
+            return false;
+        }
+
         Long id = virtualMachine.getId();
         List<String> virtualMachinesCommands = virtualMachine.loadProgram();
-        if(virtualMachinesCommands == null){
+        if (virtualMachinesCommands == null) {
             addToOutput("Invalid file");
             cleanupVm(virtualMachine);
             return false;
         }
+
         this.vmCommands.put(id, virtualMachinesCommands);
         this.virtualMachines.add(virtualMachine);
         // TODO temporary, kol gali veikti tik viena VM
@@ -253,7 +253,7 @@ public class RealMachine {
         refreshRegisters();
         refreshVirtualMachineList();
         refreshDeviceTable();
-        setNextCommand(1);
+        refreshCommandTable();
         refreshVirtualMachineMemoryTable();
     }
 
@@ -261,6 +261,48 @@ public class RealMachine {
         //TODO butu gerai paupdatint cia VM memory.
         // jei per nauja atsidarai langa tai pasupdateina, bet butu gerai ir kiekvieno stepo metu suupdatintu
         // bet ne priority (aktualu kai steka ziuri
+    }
+
+    private Map<Long, Integer> stoppedAtCommand = new HashMap<>();
+    private Map<Long, List<CommandTableRow>> commandTableRowMap = new HashMap<>();
+
+    private void putCommandsToTable() {
+        List<String> currentCommands = vmCommands.get(idOfRunningMachine);
+        List<CommandTableRow> vmCommands = new ArrayList<>();
+        commandTable.getItems().clear();
+        currentCommands.forEach(command -> {
+            CommandTableRow commandTableRow = new CommandTableRow(command);
+            vmCommands.add(commandTableRow);
+            commandTable.getItems().add(commandTableRow);
+        });
+        commandTableRowMap.put(idOfRunningMachine, vmCommands);
+        focusCommand(0);
+        commandTable.refresh();
+    }
+
+    private void refreshCommandTable() {
+        List<String> currentCommands = vmCommands.get(idOfRunningMachine);
+        if (currentCommands == null)
+            return;
+        // Nauja masina pereme darba
+        if (!commandTableRowMap.containsKey(idOfRunningMachine)) {
+            commandTable.getItems().clear();
+            List<CommandTableRow> vmCommands = new ArrayList<>();
+            currentCommands.forEach(command -> {
+                CommandTableRow commandTableRow = new CommandTableRow(command);
+                vmCommands.add(commandTableRow);
+            });
+            commandTable.getItems().addAll(vmCommands);
+            commandTableRowMap.put(idOfRunningMachine, vmCommands);
+            focusCommand(0);
+            return;
+        } else if (commandTableRowMap.containsKey(idOfRunningMachine) && stoppedAtCommand.containsKey(idOfRunningMachine)) {
+            commandTable.getItems().clear();
+            commandTable.getItems().addAll(commandTableRowMap.get(idOfRunningMachine));
+            focusCommand(stoppedAtCommand.get(idOfRunningMachine) + 1);
+            stoppedAtCommand.remove(idOfRunningMachine);
+        }
+        focusNextCommand();
     }
 
     private void refreshMemoryTable() {
@@ -295,6 +337,7 @@ public class RealMachine {
 
     private void refreshVirtualMachineList() {
         if (vmChoiceBox.getItems().size() != virtualMachines.size()) {
+            vmChoiceBox.getItems().clear();
             virtualMachines.forEach(vm -> {
                 vmChoiceBox.getItems().add("VM " + vm.getId().toString());
             });
@@ -483,13 +526,20 @@ public class RealMachine {
             return "yellow";
     }
 
-    private void setNextCommand(int commandIndex) {
-        if(commandIndex != 0)
-            commandIndex = commandTable.getSelectionModel().getFocusedIndex() + 1;
+    private void focusNextCommand() {
+        int commandIndex = commandTable.getSelectionModel().getFocusedIndex();
+        focusCommand(commandIndex + 1);
+    }
+
+    private void focusCommand(int command) {
         commandTable.getSelectionModel().clearSelection();
         commandTable.requestFocus();
-        commandTable.getSelectionModel().select(commandIndex);
-        commandTable.getFocusModel().focus(commandIndex);
+        commandTable.getSelectionModel().select(command);
+        commandTable.getFocusModel().focus(command);
+    }
+
+    private int getCommandIndex() {
+        return commandTable.getSelectionModel().getFocusedIndex() - 1;
     }
 
     private void initializeStage(Stage primaryStage) {
@@ -514,6 +564,7 @@ public class RealMachine {
         renderRegisters();
         renderRealMemory();
         renderDeviceTable();
+        renderCommandTable();
     }
 
     @FXML
@@ -523,7 +574,7 @@ public class RealMachine {
         String input = sumbitField.getText();
         if (input.isBlank())
             return;
-        addToOutput("Keyboard input: " + input);
+        appendToOutput("Keyboard input: " + input);
         if (input.contains("./")) {
             if(currentVm != null){
                 saveVMRegisters();
@@ -557,9 +608,8 @@ public class RealMachine {
     private TableView commandTable;
 
     private void renderCommandTable() {
-        List<String> currentCommands = vmCommands.get(this.idOfRunningMachine);
-
         commandTable.setPrefWidth(commandContainer.getPrefWidth());
+        commandTable.setEditable(false);
 
         TableColumn<CommandTableRow, String> column = new TableColumn<>("Command");
         column.setCellValueFactory(new PropertyValueFactory<>("command"));
@@ -569,12 +619,6 @@ public class RealMachine {
 
         commandTable.getColumns().add(column);
 
-        currentCommands.forEach(command -> {
-            CommandTableRow tableRow = new CommandTableRow(command);
-            commandTable.getItems().add(tableRow);
-        });
-
-        setNextCommand(0);
         FXUtil.fitChildrenToContainer(commandContainer);
         FXUtil.resizeEquallyTableColumns(commandTable);
     }

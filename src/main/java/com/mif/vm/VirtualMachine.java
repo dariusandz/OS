@@ -24,7 +24,7 @@ public class VirtualMachine {
         this.virtualMemory = new VirtualMemory(params);
         this.virtualProcessor = new VirtualProcessor(virtualMemory);
         this.programFileName = programFileName;
-        this.id = idGenerator.getId();
+        this.id = idGenerator.getVmId();
     }
 
     public Long getId() {

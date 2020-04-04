@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.mif.common.ByteUtil;
+import com.mif.exception.OutOfMemoryException;
 import com.mif.rm.Processor;
 import org.apache.commons.io.IOUtils;
 
@@ -17,20 +18,21 @@ public class VirtualMemory implements IMemory {
     private static final int CODESEG_START_PAGE = 4;
 
     private static int pageSize = 16;
+    private static int wordSize = 4;
+    private static int hexSize = 8;
 
-    protected static int wordSize = 4;
-    protected static int hexSize = 8;
+    private static int bytesForParameters = (DATASEG_START_PAGE - PARAMSEG_START_PAGE) * pageSize * wordSize;
 
     public static int pages = 16;
-    public static int words = 16;
+    public static int wordsPerPage = 16;
 
     public PagingTable pagingTable = new PagingTable();
 
     public VirtualMemory(List<String> params) {
         pagingTable.requestPages(pages);
         pagingTable.setPaging();
-        Processor.TI.setValue(20);
         putParamsIntoMemory(params);
+        Processor.TI.setValue(20);
     }
 
 
@@ -124,13 +126,18 @@ public class VirtualMemory implements IMemory {
         params.stream()
             .forEach(param -> longStringOfParameters.append(param));
 
-        int index = 0;
-        while (index < longStringOfParameters.length() / wordSize) {
+        if (longStringOfParameters.length() > bytesForParameters)
+            throw new OutOfMemoryException("Parameters are too long. Maximum characters for parameters: " + bytesForParameters);
+
+        int wordIndex = 0;
+        int substringCounter = 0;
+        while (wordIndex < (longStringOfParameters.length() / (double) wordSize)) {
             String param = longStringOfParameters.substring(
-                    index, Math.min(longStringOfParameters.length(), ++index * wordSize)
+                    substringCounter, Math.min(longStringOfParameters.length(), substringCounter + wordSize)
             );
+            substringCounter += 4;
             byte[] bytes = param.getBytes(StandardCharsets.UTF_8);
-            putWordToMemory(PARAMSEG_START_PAGE, index, param.getBytes(StandardCharsets.UTF_8));
+            putBytesToMemory(PARAMSEG_START_PAGE, wordIndex++, param.getBytes(StandardCharsets.UTF_8), param.length());
         }
     }
 

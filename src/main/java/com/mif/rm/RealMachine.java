@@ -103,8 +103,10 @@ public class RealMachine {
                 processInterrupts();
             } catch (FatalInterruptException e) {
                 cleanupVm(currentVm);
-                if (currentVm != null)
+                if (currentVm != null) {
                     loadVMRegisters();
+                    return;
+                }
             }
 
             updateUI();
@@ -302,7 +304,8 @@ public class RealMachine {
             focusCommand(stoppedAtCommand.get(idOfRunningMachine) + 1);
             stoppedAtCommand.remove(idOfRunningMachine);
         }
-        focusNextCommand();
+        if(processor.IC.getValue() != 0)
+            focusNextCommand();
     }
 
     private void refreshMemoryTable() {

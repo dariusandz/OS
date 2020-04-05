@@ -15,7 +15,8 @@ public class VirtualMemory implements IMemory {
 
     private static final int PARAMSEG_START_PAGE = 0;
     public static final int DATASEG_START_PAGE = 1;
-    private static final int CODESEG_START_PAGE = 4;
+    public static final int EXTRASEG_START_PAGE = 4;
+    private static final int CODESEG_START_PAGE = 5;
 
     private static int pageSize = 16;
     private static int wordSize = 4;
@@ -23,19 +24,20 @@ public class VirtualMemory implements IMemory {
 
     private static int bytesForParameters = (DATASEG_START_PAGE - PARAMSEG_START_PAGE) * pageSize * wordSize;
 
-    public static int pages = 16;
+    public int pages = 16;
     public static int wordsPerPage = 16;
 
     public PagingTable pagingTable = new PagingTable();
 
     public VirtualMemory(List<String> params) {
-        pagingTable.requestPages(pages);
+        //pagingTable.requestPages(pages);
+        pagingTable.requestPages(EXTRASEG_START_PAGE); // requestina visus apart codeseg puslapiu
         pagingTable.setPaging();
         putParamsIntoMemory(params);
         Processor.TI.setValue(20);
+        Processor.DI.setValue(0);
+        Processor.DS.setValue(0);
     }
-
-
 
     // Gets a word(command) to execute from CODESEG
     public byte[] getCodeWord(int nthWord) {
@@ -94,6 +96,12 @@ public class VirtualMemory implements IMemory {
             if(!programStr.contains("@codeseg") || !programStr.contains("@dataseg"))
                 return false;
             programStr = programStr.split("@codeseg", 2)[1];
+            // TODO gal cia galima isskirti page'us???
+            int codeSegmentWordCount = (int)Math.ceil(programStr.length() / 4.0);
+            int codeSegmentPageCount = (int)Math.ceil(codeSegmentWordCount / 16.0);
+            pagingTable.requestPages(codeSegmentPageCount);
+            Processor.PTR.setValue(new byte[] {(byte)(codeSegmentPageCount + EXTRASEG_START_PAGE), 16, Processor.PTR.getByteValue()[2], Processor.PTR.getByteValue()[3]});
+            pagingTable.setPaging();
             putIntoMemory(replaceHex(programStr));
         } catch (IOException e) {
             e.printStackTrace();
@@ -103,18 +111,9 @@ public class VirtualMemory implements IMemory {
 
     // Puts loaded program from file to CODESEG
     private void putIntoMemory(byte[] byteCode) {
-
         for (int i = 0; i < byteCode.length / wordSize; i++) {
             byte[] word = Arrays.copyOfRange(byteCode, i * wordSize, i * wordSize + wordSize);
             putWordToMemory(CODESEG_START_PAGE + i/16, i%16, word);
-            /*
-            // 8 byte commands, reads next byte for hex value
-            String wordStr = new String(word);
-            if (wordStr.contains("LD") || wordStr.contains("SVR") || wordStr.startsWith("J")) {
-                i++;
-                byte[] hexWord = Arrays.copyOfRange(byteCode, i * wordSize, i * wordSize + wordSize);
-                putWordToMemory(CODESEG_START_PAGE, i, hexWord);
-            }*/
         }
     }
 

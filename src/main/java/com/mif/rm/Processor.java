@@ -17,7 +17,7 @@ public class Processor {
 
     public static ProcessorMode processorMode;
     public static Register PTR, AX, BX;
-    public static Register IC, PI, SI, TI, PR, SP, MODE, ES, DI, ZF;
+    public static Register IC, PI, SI, TI, PR, SP, MODE, DS, DI, ZF;
     public static List<Device> devices;
 
     public static Processor getInstance() {
@@ -46,7 +46,7 @@ public class Processor {
         PR = new Register();
         SP = new Register();
         MODE = new Register();
-        ES = new Register();
+        DS = new Register();
         DI = new Register();
         ZF = new Register();
     }

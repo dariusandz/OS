@@ -1,5 +1,6 @@
 package com.mif.vm;
 
+import com.mif.rm.Memory;
 import com.mif.rm.Register;
 import com.mif.common.ByteUtil;
 import com.mif.rm.Processor;
@@ -399,14 +400,13 @@ public class CommandProcessor {
     }
 
     private void STSB() {
-        memory.putWordToMemory(15, Processor.DI.getByteValue()[3], Processor.AX.getByteValue());
+        memory.putWordToMemory(VirtualMemory.EXTRASEG_START_PAGE, Processor.DI.getByteValue()[3], Processor.AX.getByteValue());
         Processor.DI.incrementValue();
     }
 
     private void LDSB() {
-        Processor.AX.setValue(memory.getWordFromMemory(VirtualMemory.DATASEG_START_PAGE, Processor.SI.getValue()));
-        Processor.SI.incrementValue();
-        // TODO kaip veikia SI, DI ??? kokia value default?
+        Processor.AX.setValue(memory.getWordFromMemory(VirtualMemory.DATASEG_START_PAGE, Processor.DS.getValue()));
+        Processor.DS.incrementValue();
     }
 
     private void PUSH() {

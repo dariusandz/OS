@@ -23,15 +23,15 @@ public class PagingTable {
 
     public PagingTable() {
         Processor.PTR.setValue(memoryInstance.requestPage());
-        Processor.SP.setValue(new byte[]{0,0,2,15});
+        Processor.SP.setValue(new byte[]{0,0,3,15});
     }
 
     // Requests unused memory pages from real memory
     public void requestPages(int pageCount) {
-        if (memoryInstance.getFreePagesCount() < 16)
+        if (memoryInstance.getFreePagesCount() < pageCount)
             throw new OutOfMemoryException("Nebeliko laisvos atminties");
-
-        for (int i = 0; i < pageCount; i++) {
+        int newPageCount = pageMap.size() + pageCount;
+        for (int i = pageMap.size(); i < newPageCount; i++) {
             int realMemoryPage = memoryInstance.requestPage();
             if (realMemoryPage != -1) {
                 pageMap.put(i, realMemoryPage);
@@ -42,31 +42,31 @@ public class PagingTable {
     public void setPaging() {
         for (int wordNum = 0; wordNum < pageMap.size(); wordNum++) {
             byte[] realPage = ByteUtil.intToBytes(pageMap.get(wordNum));
-            memoryInstance.putWord(Processor.PTR.getValue(), wordNum, realPage);
+            memoryInstance.putWord(Processor.PTR.getValueOfSmallerTwoBytes(), wordNum, realPage);
         }
     }
 
     public byte[] getWordFromMemory(int page, int word) {
-        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(Processor.PTR.getValue(), page));
+        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(Processor.PTR.getValueOfSmallerTwoBytes(), page));
         return memoryInstance.getWord(pageInMemory, word);
     }
 
     public byte[] getBytesFromMemory(int page, int word, int byteCount) {
-        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(Processor.PTR.getValue(), page));
+        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(Processor.PTR.getValueOfSmallerTwoBytes(), page));
         return memoryInstance.getBytes(pageInMemory, word, byteCount);
     }
 
     public void putWordToMemory(int pageNum, int wordNum, byte[] word) {
-        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(Processor.PTR.getValue(), pageNum));
+        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(Processor.PTR.getValueOfSmallerTwoBytes(), pageNum));
         memoryInstance.putWord(pageInMemory, wordNum, word);
     }
 
     public void putBytesToMemory(int pageNum, int wordNum, byte[] words, int byteCount) {
-        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(Processor.PTR.getValue(), pageNum));
+        int pageInMemory = ByteUtil.byteToInt(memoryInstance.getWord(Processor.PTR.getValueOfSmallerTwoBytes(), pageNum));
         memoryInstance.putBytes(pageInMemory, wordNum, words, byteCount);    }
 
     public void freeMemory() {
-        memoryInstance.freeVMMemory(pageMap, Processor.PTR.getValue());
+        memoryInstance.freeVMMemory(pageMap, Processor.PTR.getValueOfSmallerTwoBytes());
     }
 
     public void saveVMRegisters(List<Integer> registerValues) {

@@ -2,6 +2,7 @@ package com.mif.rm;
 
 import com.mif.common.ByteUtil;
 
+import java.awt.*;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -46,5 +47,9 @@ public class Register {
 
     public String getHexValue() {
         return ByteUtil.bytesToHex(value);
+    }
+
+    public int getValueOfSmallerTwoBytes() {
+        return ByteUtil.byteToInt(new byte[] {0, 0, value[2], value[3]});
     }
 }

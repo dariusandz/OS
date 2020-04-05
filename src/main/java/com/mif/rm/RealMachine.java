@@ -496,15 +496,17 @@ public class RealMachine {
         indexCol.setEditable(false);
         tableView.getColumns().add(indexCol);
 
-        String color;
-        for (Map.Entry<Integer, Integer> entry : vm.virtualMemory.pagingTable.pageMap.entrySet()) {
-            MemoryTableRow memoryTableRow = new MemoryTableRow(entry.getValue());
 
-            TableColumn<MemoryTableRow, String> column = new TableColumn<>(entry.getKey().toString());
-            column.setCellValueFactory(FXUtil.createArrayValueFactory(MemoryTableRow::getValues, entry.getKey()));
+        for (int i = 0; i < Memory.pageSize; i++) {
+            TableColumn<MemoryTableRow, String> column = new TableColumn<>(String.valueOf(i));
+            column.setCellValueFactory(FXUtil.createArrayValueFactory(MemoryTableRow::getValues, i));
             column.setSortable(false);
             column.setEditable(false);
             tableView.getColumns().add(column);
+        }
+
+        for (Map.Entry<Integer, Integer> entry : vm.virtualMemory.pagingTable.pageMap.entrySet()) {
+            MemoryTableRow memoryTableRow = new MemoryTableRow(entry.getValue());
 
             for (int row = 0; row < Memory.pageSize; row++) {
                 for (int col = 0; col < Memory.pageSize; col++) {

@@ -1,6 +1,7 @@
 package com.mif.vm;
 
 import java.io.*;
+import java.lang.reflect.Parameter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,10 +14,10 @@ import org.apache.commons.io.IOUtils;
 
 public class VirtualMemory implements IMemory {
 
-    private static final int PARAMSEG_START_PAGE = 0;
+    public static final int PARAMSEG_START_PAGE = 0;
     public static final int DATASEG_START_PAGE = 1;
     public static final int EXTRASEG_START_PAGE = 4;
-    private static final int CODESEG_START_PAGE = 5;
+    public static final int CODESEG_START_PAGE = 5;
 
     private static int pageSize = 16;
     private static int wordSize = 4;
@@ -31,7 +32,7 @@ public class VirtualMemory implements IMemory {
 
     public VirtualMemory(List<String> params) {
         //pagingTable.requestPages(pages);
-        pagingTable.requestPages(EXTRASEG_START_PAGE); // requestina visus apart codeseg puslapiu
+        pagingTable.requestPages(CODESEG_START_PAGE); // requestina visus apart codeseg puslapiu
         pagingTable.setPaging();
         putParamsIntoMemory(params);
         Processor.TI.setValue(20);
@@ -121,22 +122,14 @@ public class VirtualMemory implements IMemory {
         if (params.isEmpty())
             return;
 
-        StringBuilder longStringOfParameters = new StringBuilder();
-        params.stream()
-            .forEach(param -> longStringOfParameters.append(param));
+        List<Integer> intParams = new ArrayList<>();
+        for (String param: params) {
+            intParams.add(Integer.parseInt(param));
+        }
 
-        if (longStringOfParameters.length() > bytesForParameters)
-            throw new OutOfMemoryException("Parameters are too long. Maximum characters for parameters: " + bytesForParameters);
-
-        int wordIndex = 0;
-        int substringCounter = 0;
-        while (wordIndex < (longStringOfParameters.length() / (double) wordSize)) {
-            String param = longStringOfParameters.substring(
-                    substringCounter, Math.min(longStringOfParameters.length(), substringCounter + wordSize)
-            );
-            substringCounter += 4;
-            byte[] bytes = param.getBytes(StandardCharsets.UTF_8);
-            putBytesToMemory(PARAMSEG_START_PAGE, wordIndex++, param.getBytes(StandardCharsets.UTF_8), param.length());
+        for (int i = 0; i < intParams.size(); i++) {
+            putWordToMemory(PARAMSEG_START_PAGE, i * 2, ByteUtil.intToBytes(intParams.get(i)));
+            putWordToMemory(PARAMSEG_START_PAGE, i * 2 + 1, new byte[] {0, 0, 0, 0});
         }
     }
 

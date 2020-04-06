@@ -7,6 +7,9 @@ import com.mif.rm.Processor;
 
 import java.nio.ByteBuffer;
 import static com.mif.vm.CMD.*;
+import static com.mif.vm.VirtualMemory.CODESEG_START_PAGE;
+import static com.mif.vm.VirtualMemory.EXTRASEG_START_PAGE;
+import static com.mif.vm.VirtualMemory.PARAMSEG_START_PAGE;
 
 public class CommandProcessor {
 
@@ -179,6 +182,10 @@ public class CommandProcessor {
         int page = ByteUtil.getIthByteFromString(hexValue, 2);
         int word = ByteUtil.getIthByteFromString(hexValue, 3);
 
+        if(page > CODESEG_START_PAGE) {
+            Processor.PI.setValue(2);
+            return;
+        }
         getRegister(regChar).setValue(memory.getWordFromMemory(page, word));
     }
 
@@ -190,6 +197,10 @@ public class CommandProcessor {
         int page = ByteUtil.getIthByteFromString(hexValue, 2);
         int word = ByteUtil.getIthByteFromString(hexValue, 3);
 
+        if(page > CODESEG_START_PAGE) {
+            Processor.PI.setValue(2);
+            return;
+        }
         memory.putValueToMemory(page, word, regVal);
     }
 
@@ -210,8 +221,8 @@ public class CommandProcessor {
                 getRegister(r2).getValue() + getRegister(r1).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            processor.ZF.setValue(0);
-        else processor.ZF.setValue(1);
+            processor.ZF.setValue(1);
+        else processor.ZF.setValue(0);
     }
 
     private void SB(String command) {
@@ -222,8 +233,8 @@ public class CommandProcessor {
                 getRegister(r1).getValue() - getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            processor.ZF.setValue(0);
-        else processor.ZF.setValue(1);
+            processor.ZF.setValue(1);
+        else processor.ZF.setValue(0);
     }
 
     private void ML(String command) {
@@ -234,8 +245,8 @@ public class CommandProcessor {
                 getRegister(r1).getValue() * getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            processor.ZF.setValue(0);
-        else processor.ZF.setValue(1);
+            processor.ZF.setValue(1);
+        else processor.ZF.setValue(0);
     }
 
     private void DV(String command) {
@@ -246,8 +257,8 @@ public class CommandProcessor {
                 getRegister(r1).getValue() / getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            processor.ZF.setValue(0);
-        else processor.ZF.setValue(1);
+            processor.ZF.setValue(1);
+        else processor.ZF.setValue(0);
     }
 
     private void CM(String command) {
@@ -274,8 +285,8 @@ public class CommandProcessor {
                 getRegister(r1).getValue() & getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            processor.ZF.setValue(0);
-        else processor.ZF.setValue(1);
+            processor.ZF.setValue(1);
+        else processor.ZF.setValue(0);
     }
 
     private void XR(String command) {
@@ -286,8 +297,8 @@ public class CommandProcessor {
                 getRegister(r1).getValue() ^ getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            processor.ZF.setValue(0);
-        else processor.ZF.setValue(1);
+            processor.ZF.setValue(1);
+        else processor.ZF.setValue(0);
     }
 
     private void OR(String command) {
@@ -297,7 +308,7 @@ public class CommandProcessor {
         getRegister(r1).setValue(
                 getRegister(r1).getValue() ^ getRegister(r2).getValue()
         );
-        if(getRegister(r1).getValue() == 0)
+        if(getRegister(r1).getValue() != 0)
             processor.ZF.setValue(0);
         else processor.ZF.setValue(1);
     }
@@ -308,7 +319,7 @@ public class CommandProcessor {
         getRegister(r1).setValue(
                 ~getRegister(r1).getValue()
         );
-        if(getRegister(r1).getValue() == 0)
+        if(getRegister(r1).getValue() != 0)
             processor.ZF.setValue(0);
         else processor.ZF.setValue(1);
     }
@@ -320,7 +331,7 @@ public class CommandProcessor {
         getRegister(r1).setValue(
                 getRegister(r1).getValue() << getRegister(r2).getValue()
         );
-        if(getRegister(r1).getValue() == 0)
+        if(getRegister(r1).getValue() != 0)
             processor.ZF.setValue(0);
         else processor.ZF.setValue(1);
     }
@@ -421,35 +432,43 @@ public class CommandProcessor {
     }
 
     private void PRNT() {
+        if(Processor.AX.getByteValue()[2] > PARAMSEG_START_PAGE && Processor.AX.getByteValue()[2] < EXTRASEG_START_PAGE)
         processor.SI.setValue(
                 2
         );
+        else Processor.PI.setValue(1);
     }
 
     private void PNUM() {
+        if(Processor.AX.getByteValue()[2] > PARAMSEG_START_PAGE && Processor.AX.getByteValue()[2] < EXTRASEG_START_PAGE)
         processor.SI.setValue(
                 4
         );
+        else Processor.PI.setValue(1);
     }
 
     private void SCAN() {
-        processor.SI.setValue(
-                1
-        );
+        if(Processor.AX.getByteValue()[2] > PARAMSEG_START_PAGE && Processor.AX.getByteValue()[2] < EXTRASEG_START_PAGE)
+            Processor.SI.setValue(
+                    1
+            );
+        else Processor.PI.setValue(1);
     }
 
     private void LOAD() {
-        processor.SI.setValue(
-                5
-        );
+        if(Processor.AX.getByteValue()[2] > PARAMSEG_START_PAGE && Processor.AX.getByteValue()[2] < EXTRASEG_START_PAGE)
+            Processor.SI.setValue(
+                    5
+            );
+        else Processor.PI.setValue(1);
     }
 
     private void MONT() {
-        processor.SI.setValue(10);
+        Processor.SI.setValue(10);
     }
 
     private void UNMT() {
-        processor.SI.setValue(11);
+        Processor.SI.setValue(11);
     }
 
     private void POWR() {

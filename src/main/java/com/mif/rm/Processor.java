@@ -1,5 +1,6 @@
 package com.mif.rm;
 
+import com.mif.common.ByteUtil;
 import com.mif.exception.FatalInterruptException;
 import com.mif.exception.HarmlessInterruptException;
 import com.mif.exception.InterruptException;
@@ -64,7 +65,7 @@ public class Processor {
             case 3:
                 throw new FatalInterruptException("Virtuali masina baige darba.", "SI: " + SI.getValue());
             case 4:
-                return new Pair<>(SIValue, new String(virtualMemory.getWordFromMemory(AX.getByteValue()[2], AX.getByteValue()[3]), StandardCharsets.UTF_8));
+                return new Pair<>(SIValue, Integer.toString(ByteUtil.byteToInt(virtualMemory.getWordFromMemory(AX.getByteValue()[2], AX.getByteValue()[3]))));
             case 5:
                 int fileNamePageNum = Processor.AX.getByteValue()[2];
                 int fileNameWordNum = Processor.AX.getByteValue()[3];

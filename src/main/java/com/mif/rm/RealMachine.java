@@ -51,6 +51,7 @@ public class RealMachine {
     // TODO Leistų užkrauti kitas vartotojų programas ir valdymas būtų atiduodamas vėliausiai užkrautajai (jei laisvos atminties nepakanka apie tai pranešama)...... cia :(((((
     private Processor processor;
     private Memory memory;
+    private ChannelDevice channelDevice;
 
     private VirtualMachine currentVm = null;
     private Long idOfRunningMachine;
@@ -60,6 +61,7 @@ public class RealMachine {
     private List<RegisterInstance> readonlyRegisters;
 
     public RealMachine(Stage primaryStage) {
+        this.channelDevice = new ChannelDevice();
         this.memory = Memory.getInstance();
         this.processor = Processor.getInstance();
         this.getRegisters();
@@ -91,7 +93,9 @@ public class RealMachine {
 
     @FXML
     private void stepOver() {
-        step();
+        if(!outputField.getText().contains("Type") || outputField.getText().contains("Keyboard")){
+            step();
+        }
     }
 
     public void step() {
@@ -117,10 +121,9 @@ public class RealMachine {
         try {
             Pair<Integer, String> siValuePair = processor.processSIValue(currentVm.virtualMemory);
             if (siValuePair != null) {
-                if (siValuePair.getKey() == 1) {
-                    addToOutput(siValuePair.getValue());
-                } else if (siValuePair.getKey() ==  2 || siValuePair.getKey() == 4) {
-                    addToOutput(siValuePair.getValue());
+                if (siValuePair.getKey() == 1 || siValuePair.getKey() ==  2 || siValuePair.getKey() == 4) {
+                    addToOutput(channelDevice.process(siValuePair));
+                    //addToOutput(siValuePair.getValue());
                 } else if (siValuePair.getKey() == 5) {
                     saveVMRegisters();
                     processor.resetRegisterValues();
@@ -130,7 +133,6 @@ public class RealMachine {
                     removeFromDeviceTable(siValuePair.getValue());
                 }
             }
-
             processor.processTIValue();
             processor.processPIValue();
         } catch (FatalInterruptException | HarmlessInterruptException e) {
@@ -220,6 +222,9 @@ public class RealMachine {
             virtualMachine = new VirtualMachine(programFileName, params);
         } catch (OutOfMemoryException e) {
             appendToOutput(e.getMessage());
+            return false;
+        } catch (NumberFormatException e) {
+            appendToOutput("Parameter supposed to be an integer");
             return false;
         }
 
@@ -593,17 +598,13 @@ public class RealMachine {
     }
 
     private void processSCANCommand(String input) {
-        int counter = 0;
-        String symbolNumber = "";
-        while(outputField.getText().charAt(8 + counter) != ' ') {
-            symbolNumber = symbolNumber.concat(String.valueOf(outputField.getText().charAt(8 + counter)));
-            counter++;
+        if (input.length() != Processor.BX.getValue()) {
+            addToOutput("You've typed in incorrect number of symbols \n" + "Type in " +
+                    Processor.BX.getValue() + " symbols \n");
+        } else {
+            byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
+            currentVm.virtualMemory.putBytesToMemory(Processor.AX.getByteValue()[2], Processor.AX.getByteValue()[3], bytes, bytes.length);
         }
-        while (input.length() != Integer.valueOf(symbolNumber)) {
-            addToOutput(outputField.getText());
-        }
-        byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
-        virtualMachines.get(0).virtualMemory.putBytesToMemory(Processor.AX.getByteValue()[2], Processor.AX.getByteValue()[3], bytes, bytes.length);
     }
 
     @FXML

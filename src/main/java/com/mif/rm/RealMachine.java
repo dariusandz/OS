@@ -224,7 +224,7 @@ public class RealMachine {
             appendToOutput(e.getMessage());
             return false;
         } catch (NumberFormatException e) {
-            appendToOutput("Parameter supposed to be an integer");
+            appendToOutput("Parameters should be integers");
             return false;
         }
 

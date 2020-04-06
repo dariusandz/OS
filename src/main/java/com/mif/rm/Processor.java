@@ -10,6 +10,7 @@ import javafx.util.Pair;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Processor {
@@ -81,7 +82,7 @@ public class Processor {
                         fileNamePageNum++;
                     }
                 }
-                return new Pair<>(SIValue, new String(temp));
+                return new Pair<>(SIValue, new String(Arrays.copyOf(temp, byteCount - 1)));
             case 6:
                 if (devices.size() < AX.getValue()) {
                     throw new HarmlessInterruptException("Klaida: blogas irenginio indeksas", "SI: " + SI.getValue());

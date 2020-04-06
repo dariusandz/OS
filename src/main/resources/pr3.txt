@@ -1,5 +1,5 @@
 @dataseg
-pr2 baige darba pr1.txt 22 2222
+pr5 baige darba pr5.txt 22 2222
 @codeseg
 LDNA 00000104
 LDNA 00000104

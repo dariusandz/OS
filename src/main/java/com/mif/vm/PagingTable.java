@@ -23,7 +23,7 @@ public class PagingTable {
 
     public PagingTable() {
         Processor.PTR.setValue(memoryInstance.requestPage());
-        Processor.SP.setValue(new byte[]{0,0,3,15});
+        Processor.SP.setValue(new byte[]{0,0,VirtualMemory.EXTRASEG_START_PAGE - 1,15});
     }
 
     // Requests unused memory pages from real memory

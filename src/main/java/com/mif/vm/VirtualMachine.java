@@ -2,6 +2,7 @@ package com.mif.vm;
 
 import com.mif.common.FileReader;
 import com.mif.common.IdGenerator;
+import com.mif.rm.Processor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,9 @@ public class VirtualMachine {
         this.virtualProcessor = new VirtualProcessor(virtualMemory);
         this.programFileName = programFileName;
         this.id = idGenerator.getVmId();
+        Processor.TI.setValue(20);
+        Processor.DI.setValue(0);
+        Processor.DS.setValue(0);
     }
 
     public Long getId() {

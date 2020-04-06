@@ -35,9 +35,6 @@ public class VirtualMemory implements IMemory {
         pagingTable.requestPages(CODESEG_START_PAGE); // requestina visus apart codeseg puslapiu
         pagingTable.setPaging();
         putParamsIntoMemory(params);
-        Processor.TI.setValue(20);
-        Processor.DI.setValue(0);
-        Processor.DS.setValue(0);
     }
 
     // Gets a word(command) to execute from CODESEG

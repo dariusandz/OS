@@ -86,7 +86,7 @@ public class CommandProcessor {
             LOOP();
         }
         else if (getCommandByteValue(command, 4) == HALT.getValue()) {
-            HALT(command);
+            HALT();
         }
         else if (getCommandByteValue(command, 4) == STSB.getValue()) {
             STSB();
@@ -351,7 +351,7 @@ public class CommandProcessor {
     private void JUMP() {
         String hexVal = nextWord();
         processor.IC.setValue(
-                ByteUtil.stringHexToInt(hexVal)
+                hexVal.getBytes()
         );
     }
 
@@ -359,7 +359,7 @@ public class CommandProcessor {
         String hexVal = nextWord();
         if (processor.PR.getValue() == 0) {
             processor.IC.setValue(
-                    ByteUtil.stringHexToInt(hexVal)
+                    hexVal.getBytes()
             );
         }
     }
@@ -368,16 +368,16 @@ public class CommandProcessor {
         String hexVal = nextWord();
         if (processor.PR.getValue() == 1) {
             processor.IC.setValue(
-                    ByteUtil.stringHexToInt(hexVal)
+                    hexVal.getBytes()
             );
         }
     }
 
     private void JMPZ() {
-        String hexVal = nextWord();
+        String hexVal = nextWord() + nextWord();
         if (processor.ZF.getValue() == 1) {
             processor.IC.setValue(
-                    ByteUtil.stringHexToInt(hexVal)
+                    hexVal.getBytes()
             );
         }
     }
@@ -386,25 +386,25 @@ public class CommandProcessor {
         String hexVal = nextWord();
         if (processor.ZF.getValue() != 0) {
             processor.IC.setValue(
-                    ByteUtil.stringHexToInt(hexVal)
+                    hexVal.getBytes()
             );
         }
     }
 
     private void LOOP() {
+        String hexVal = nextWord();
         processor.AX.setValue(
                 processor.AX.getValue() - 1
         );
 
         if (processor.AX.getValue() != 0) {
-            String hexVal = nextWord();
             processor.IC.setValue(
-                    ByteUtil.stringHexToInt(hexVal)
+                    hexVal.getBytes()
             );
         }
     }
 
-    private void HALT(String command) {
+    private void HALT() {
         processor.SI.setValue(
                 3
         );
@@ -432,23 +432,25 @@ public class CommandProcessor {
     }
 
     private void PRNT() {
-        if(Processor.AX.getByteValue()[2] > PARAMSEG_START_PAGE && Processor.AX.getByteValue()[2] < EXTRASEG_START_PAGE)
-        processor.SI.setValue(
+        if(Processor.AX.getByteValue()[2] > PARAMSEG_START_PAGE && Processor.AX.getByteValue()[2] < CODESEG_START_PAGE)
+        Processor.SI.setValue(
                 2
         );
         else Processor.PI.setValue(1);
     }
 
     private void PNUM() {
-        if(Processor.AX.getByteValue()[2] > PARAMSEG_START_PAGE && Processor.AX.getByteValue()[2] < EXTRASEG_START_PAGE)
-        processor.SI.setValue(
+        if(Processor.AX.getByteValue()[2] > PARAMSEG_START_PAGE && Processor.AX.getByteValue()[2] < CODESEG_START_PAGE)
+        Processor.SI.setValue(
                 4
         );
-        else Processor.PI.setValue(1);
+        else {
+            Processor.PI.setValue(1);
+        }
     }
 
     private void SCAN() {
-        if(Processor.AX.getByteValue()[2] > PARAMSEG_START_PAGE && Processor.AX.getByteValue()[2] < EXTRASEG_START_PAGE)
+        if(Processor.AX.getByteValue()[2] > PARAMSEG_START_PAGE && Processor.AX.getByteValue()[2] < CODESEG_START_PAGE)
             Processor.SI.setValue(
                     1
             );
@@ -456,7 +458,7 @@ public class CommandProcessor {
     }
 
     private void LOAD() {
-        if(Processor.AX.getByteValue()[2] > PARAMSEG_START_PAGE && Processor.AX.getByteValue()[2] < EXTRASEG_START_PAGE)
+        if(Processor.AX.getByteValue()[2] > PARAMSEG_START_PAGE && Processor.AX.getByteValue()[2] < CODESEG_START_PAGE)
             Processor.SI.setValue(
                     5
             );

@@ -72,7 +72,7 @@ public class VirtualMemory implements IMemory {
         for (int i = 0; i < program.length(); i += 4) {
             String command = program.substring(i, i + 4);
             byteList = ByteUtil.appendBytesToByteList(byteList, command.getBytes());
-            if (command.contains("LD") || command.contains("SVR") || command.startsWith("J")) {
+            if (command.contains("LD") || command.contains("SVR") || command.startsWith("J") || command.startsWith("LOOP")) {
                 byte[] hexbytes = ByteUtil.stringHexToBytes(
                         program.substring(i + 4, i + 12)
                 );

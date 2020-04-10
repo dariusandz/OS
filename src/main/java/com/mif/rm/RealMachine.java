@@ -13,6 +13,7 @@ import com.mif.FXModel.RegisterInstance;
 import com.mif.exception.FatalInterruptException;
 import com.mif.exception.HarmlessInterruptException;
 import com.mif.exception.OutOfMemoryException;
+import com.mif.exception.TimerInterruptException;
 import com.mif.vm.VirtualMachine;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -139,6 +140,9 @@ public class RealMachine {
             addToOutput(e.getLocalCause());
             updateUI();
             throw e;
+        } catch (TimerInterruptException e) {
+            addToOutput(e.getLocalCause());
+            Processor.TI.setValue(30);
         }
     }
 

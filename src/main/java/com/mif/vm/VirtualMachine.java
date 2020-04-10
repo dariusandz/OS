@@ -26,7 +26,7 @@ public class VirtualMachine {
         this.virtualProcessor = new VirtualProcessor(virtualMemory);
         this.programFileName = programFileName;
         this.id = idGenerator.getVmId();
-        Processor.TI.setValue(20);
+        Processor.TI.setValue(30);
         Processor.DI.setValue(0);
         Processor.DS.setValue(0);
     }

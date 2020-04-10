@@ -4,6 +4,7 @@ import com.mif.common.ByteUtil;
 import com.mif.exception.FatalInterruptException;
 import com.mif.exception.HarmlessInterruptException;
 import com.mif.exception.InterruptException;
+import com.mif.exception.TimerInterruptException;
 import com.mif.vm.VirtualMemory;
 import javafx.util.Pair;
 
@@ -57,15 +58,15 @@ public class Processor {
         int SIValue = SI.getValue();
         SI.setValue(0);
         switch (SIValue) {
-            case 1:
+            case 1: // SCAN
                 int letterCount = BX.getValue();
                 return new Pair<>(SIValue, "Type in " + letterCount + " symbols");
-            case 2:
+            case 2: // PRNT
                 byte[] bytes1 = virtualMemory.getBytesFromMemory(AX.getByteValue()[2], AX.getByteValue()[3], BX.getValue());
                 return new Pair<>(SIValue, new String(bytes1, StandardCharsets.UTF_8));
             case 3:
                 throw new FatalInterruptException("Virtuali masina baige darba.", "SI: " + SI.getValue());
-            case 4:
+            case 4: // PNUM
                 return new Pair<>(SIValue, Integer.toString(ByteUtil.byteToInt(virtualMemory.getWordFromMemory(AX.getByteValue()[2], AX.getByteValue()[3]))));
             case 5:
                 int fileNamePageNum = Processor.AX.getByteValue()[2];
@@ -178,7 +179,7 @@ public class Processor {
         );
 
         if (TI.getValue() <= 0) {
-            throw new FatalInterruptException("Klaida: baigesi taimerio laikas", "TI: " + TI.getValue());
+            throw new TimerInterruptException("Klaida: baigesi taimerio laikas", "TI: " + TI.getValue());
         }
     }
 

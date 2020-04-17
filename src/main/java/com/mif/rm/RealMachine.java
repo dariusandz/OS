@@ -242,7 +242,6 @@ public class RealMachine {
 
         this.vmCommands.put(id, virtualMachinesCommands);
         this.virtualMachines.add(virtualMachine);
-        // TODO temporary, kol gali veikti tik viena VM
         this.idOfRunningMachine = virtualMachine.getId();
         this.currentVm = virtualMachine;
         this.refreshVirtualMachineList();
@@ -265,13 +264,6 @@ public class RealMachine {
         refreshVirtualMachineList();
         refreshDeviceTable();
         refreshCommandTable();
-        refreshVirtualMachineMemoryTable();
-    }
-
-    private void refreshVirtualMachineMemoryTable() {
-        //TODO butu gerai paupdatint cia VM memory.
-        // jei per nauja atsidarai langa tai pasupdateina, bet butu gerai ir kiekvieno stepo metu suupdatintu
-        // bet ne priority (aktualu kai steka ziuri
     }
 
     private Map<Long, Integer> stoppedAtCommand = new HashMap<>();

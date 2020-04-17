@@ -88,8 +88,12 @@ public class VirtualMemory implements IMemory {
     public boolean loadProgram(String filePath) {
         InputStream inputStream = null;
         try {
-            inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
-            String programStr = IOUtils.toString(inputStream, "UTF-8");
+            //inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
+            inputStream = getClass().getClassLoader().getResourceAsStream("HDD.txt");
+            //String programStr = IOUtils.toString(inputStream, "UTF-8");
+            String hddStr = IOUtils.toString(inputStream, "UTF-8");
+            String programStr = hddStr.split("@" + filePath + "\r\n",2)[1];
+            programStr = programStr.split("\n!",2)[0];
             programStr = programStr.replaceAll("\n", "").replace(" ", "").replace("\r","");
             if(!programStr.contains("@codeseg") || !programStr.contains("@dataseg"))
                 return false;

@@ -19,12 +19,12 @@ public class VirtualMachine {
     public VirtualProcessor virtualProcessor;
     public VirtualMemory virtualMemory;
 
-    private String programFileName;
+    private String programName;
 
-    public VirtualMachine(String programFileName, List<String> params) {
+    public VirtualMachine(String programName, List<String> params) {
         this.virtualMemory = new VirtualMemory(params);
         this.virtualProcessor = new VirtualProcessor(virtualMemory);
-        this.programFileName = programFileName;
+        this.programName = programName;
         this.id = idGenerator.getVmId();
         Processor.TI.setValue(30);
         Processor.DI.setValue(0);
@@ -44,8 +44,8 @@ public class VirtualMachine {
     }
 
     public List<String> loadProgram() {
-        String program = reader.loadProgramAsString(this.programFileName);
-        if(!virtualProcessor.loadInstructionsFromFile(programFileName))
+        String program = reader.loadProgramAsString(this.programName);
+        if(!virtualProcessor.loadInstructionsFromFile(programName))
             return null;
         String[] programArrays = program.split("@dataseg",2)[1].split("@codeseg",3);
         putDataSeg(programArrays[0]);

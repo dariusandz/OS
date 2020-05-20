@@ -1,5 +1,6 @@
 package com.mif.vm;
 
+import com.mif.rm.ChannelDevice;
 import com.mif.rm.Memory;
 import com.mif.rm.Register;
 import com.mif.common.ByteUtil;
@@ -168,7 +169,6 @@ public class CommandProcessor {
 
     private void LDN(String command) { // i registra talpinamas skaicius
         char regChar = getRegChar(command, 3);
-
         String hexValue = nextWord();
         getRegister(regChar).setValue(
                 ByteUtil.stringHexToInt(hexValue)
@@ -177,7 +177,6 @@ public class CommandProcessor {
 
     private void LDM(String command) { // i registra keliamas zodis is atminties
         char regChar = getRegChar(command, 3);
-
         String hexValue = nextWord();
         int page = ByteUtil.getIthByteFromString(hexValue, 2);
         int word = ByteUtil.getIthByteFromString(hexValue, 3);
@@ -192,7 +191,6 @@ public class CommandProcessor {
     private void SVR(String command) { // i atminti talpinam registro reiksme
         char regChar = getRegChar(command, 3);
         int regVal = getRegister(regChar).getValue();
-
         String hexValue = nextWord();
         int page = ByteUtil.getIthByteFromString(hexValue, 2);
         int word = ByteUtil.getIthByteFromString(hexValue, 3);
@@ -221,8 +219,8 @@ public class CommandProcessor {
                 getRegister(r2).getValue() + getRegister(r1).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            processor.ZF.setValue(1);
-        else processor.ZF.setValue(0);
+            Processor.ZF.setValue(1);
+        else Processor.ZF.setValue(0);
     }
 
     private void SB(String command) {
@@ -233,8 +231,8 @@ public class CommandProcessor {
                 getRegister(r1).getValue() - getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            processor.ZF.setValue(1);
-        else processor.ZF.setValue(0);
+            Processor.ZF.setValue(1);
+        else Processor.ZF.setValue(0);
     }
 
     private void ML(String command) {
@@ -245,8 +243,8 @@ public class CommandProcessor {
                 getRegister(r1).getValue() * getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            processor.ZF.setValue(1);
-        else processor.ZF.setValue(0);
+            Processor.ZF.setValue(1);
+        else Processor.ZF.setValue(0);
     }
 
     private void DV(String command) {
@@ -257,8 +255,8 @@ public class CommandProcessor {
                 getRegister(r1).getValue() / getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            processor.ZF.setValue(1);
-        else processor.ZF.setValue(0);
+            Processor.ZF.setValue(1);
+        else Processor.ZF.setValue(0);
     }
 
     private void CM(String command) {
@@ -267,14 +265,14 @@ public class CommandProcessor {
 
         int diff = getRegister(r1).getValue() - getRegister(r2).getValue();
         if (diff == 0)
-            processor.PR.setValue(0);
+            Processor.PR.setValue(0);
         else if (diff < 0)
-            processor.PR.setValue(2);
+            Processor.PR.setValue(2);
         else if(diff > 0)
-            processor.PR.setValue(1);
+            Processor.PR.setValue(1);
         if(diff == 0)
-            processor.ZF.setValue(0);
-        else processor.ZF.setValue(1);
+            Processor.ZF.setValue(0);
+        else Processor.ZF.setValue(1);
     }
 
     private void AN(String command) {
@@ -285,8 +283,8 @@ public class CommandProcessor {
                 getRegister(r1).getValue() & getRegister(r2).getValue()
         );
         if(getRegister(r1).getValue() == 0)
-            processor.ZF.setValue(1);
-        else processor.ZF.setValue(0);
+            Processor.ZF.setValue(1);
+        else Processor.ZF.setValue(0);
     }
 
     private void XR(String command) {

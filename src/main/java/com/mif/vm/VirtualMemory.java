@@ -98,7 +98,6 @@ public class VirtualMemory implements IMemory {
             if(!programStr.contains("@codeseg") || !programStr.contains("@dataseg"))
                 return false;
             programStr = programStr.split("@codeseg", 2)[1];
-            // TODO gal cia galima isskirti page'us???
             int codeSegmentWordCount = (int)Math.ceil(programStr.length() / 4.0);
             int codeSegmentPageCount = (int)Math.ceil(codeSegmentWordCount / 16.0);
             pagingTable.requestPages(codeSegmentPageCount);

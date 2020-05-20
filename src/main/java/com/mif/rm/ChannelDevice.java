@@ -16,7 +16,7 @@ public class ChannelDevice {
         DT = new Register();
     }
 
-    public String process(Pair<Integer, String> siValuePair) {
+    String processSIValue(Pair<Integer, String> siValuePair) {
         if(siValuePair.getKey() == 1) {
             ST.setValue(4);
             DT.setValue(1);

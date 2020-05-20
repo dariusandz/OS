@@ -121,7 +121,6 @@ public class RealMachine {
             Pair<Integer, String> siValuePair = processor.processSIValue(currentVm.virtualMemory);
             if (siValuePair != null) {
                 if (siValuePair.getKey() == 1 || siValuePair.getKey() ==  2 || siValuePair.getKey() == 4) {
-
                     addToOutput(channelDevice.processSIValue(siValuePair));
                     //addToOutput(siValuePair.getValue());
                 } else if (siValuePair.getKey() == 5) {

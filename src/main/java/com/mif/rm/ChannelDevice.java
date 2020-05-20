@@ -9,6 +9,13 @@ public class ChannelDevice {
         initRegisters();
     }
 
+    public static void resetRegisters() {
+        SB.setValue(0);
+        DB.setValue(0);
+        ST.setValue(0);
+        DT.setValue(0);
+    }
+
     private void initRegisters() {
         SB = new Register();
         DB = new Register();
@@ -16,7 +23,7 @@ public class ChannelDevice {
         DT = new Register();
     }
 
-    String processSIValue(Pair<Integer, String> siValuePair) {
+    void processSIValue(Pair<Integer, String> siValuePair) {
         if(siValuePair.getKey() == 1) {
             SB.setValue(1);
             DB.setValue(2);
@@ -29,6 +36,5 @@ public class ChannelDevice {
             ST.setValue(1);
             DT.setValue(4);
         }
-        return siValuePair.getValue();
     }
 }

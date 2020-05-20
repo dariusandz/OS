@@ -92,9 +92,11 @@ public class RealMachine {
 
     @FXML
     private void stepOver() {
-        if(!outputField.getText().contains("Type") || outputField.getText().contains("Keyboard")){
+        if(ChannelDevice.DB.getValue() != 2)
             step();
-        }
+/*        if(!outputField.getText().contains("Type") || outputField.getText().contains("Keyboard")){
+            step();
+        }*/
     }
 
     public void step() {
@@ -121,8 +123,11 @@ public class RealMachine {
             Pair<Integer, String> siValuePair = processor.processSIValue(currentVm.virtualMemory);
             if (siValuePair != null) {
                 if (siValuePair.getKey() == 1 || siValuePair.getKey() ==  2 || siValuePair.getKey() == 4) {
-                    addToOutput(channelDevice.processSIValue(siValuePair));
-                    //addToOutput(siValuePair.getValue());
+                    channelDevice.processSIValue(siValuePair);
+                    if(ChannelDevice.DB.getValue() == 1) {
+                        addToOutput(siValuePair.getValue());
+                        ChannelDevice.resetRegisters();
+                    }
                 } else if (siValuePair.getKey() == 5) {
                     saveVMRegisters();
                     processor.resetRegisterValues();
@@ -586,7 +591,7 @@ public class RealMachine {
             }
             run(input);
         }
-        else if (outputField.getText().contains("Type")) {
+        else if (ChannelDevice.DB.getValue() == 2) {
             processSCANCommand(input);
         }
     }
@@ -596,6 +601,7 @@ public class RealMachine {
             addToOutput("You've typed in incorrect number of symbols \n" + "Type in " +
                     Processor.BX.getValue() + " symbols \n");
         } else {
+            ChannelDevice.resetRegisters();
             byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
             currentVm.virtualMemory.putBytesToMemory(Processor.AX.getByteValue()[2], Processor.AX.getByteValue()[3], bytes, bytes.length);
         }
